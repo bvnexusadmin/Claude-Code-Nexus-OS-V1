@@ -14,3 +14,12 @@ build/
 # OS junk
 .DS_Store
 Thumbs.db
+
+# Editor
+.vscode/
+
+# Supabase local files
+supabase/
+
+# Frontend (tracked later)
+frontend/
