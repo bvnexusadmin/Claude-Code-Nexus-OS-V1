@@ -70,9 +70,6 @@ export async function outboundSmsAgent(input: OutboundSmsInput) {
 
   // ----------------------------
   // 3) Persist outbound message
-  // IMPORTANT: Your messages table DOES NOT have `status`.
-  // It DOES have: event, source, raw_payload, external_id, from_number, to_number, etc.
-  // We store delivery state in `event` and details in `raw_payload`.
   // ----------------------------
   const outboundRow = {
     client_id: input.client_id,
@@ -82,6 +79,9 @@ export async function outboundSmsAgent(input: OutboundSmsInput) {
     sender_type: "ai",
     content: input.body,
     trace_id: traceId,
+
+    // 🔑 REQUIRED — FIXES THE CRASH
+    topic: "conversation",
 
     // delivery / transport metadata
     event: result.status, // "queued" | "blocked_carrier" | "failed" | ...

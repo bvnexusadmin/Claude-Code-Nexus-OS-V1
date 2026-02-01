@@ -1,141 +1,120 @@
 // src/agents/conversationManager.ts
 
-import { qualificationAgent } from "./qualificationAgent.js";
+import { supabaseAdmin } from "../utils/supabaseAdmin.js";
+import type { ConversationState } from "./contracts/conversationState.js";
+import { isValidTransition } from "./contracts/conversationState.js";
 
-/**
- * Conversation Manager (Agent 7) — v1
- * Decision-only router.
- */
-export function conversationManager(input: {
+export async function conversationManager(input: {
   client_id: string;
   event: {
     type: string;
     channel: string;
     occurred_at: string;
-    raw?: Record<string, unknown>;
+    payload?: Record<string, any>;
   };
   lead?: {
     id?: string;
-    stage?: string;
+    stage?: ConversationState;
     phone?: string | null;
+    service_type?: string;
   };
   recent_messages?: Array<{
     direction: "inbound" | "outbound";
     content: string;
   }>;
 }) {
-  try {
-    const actions: any[] = [];
+  const actions: any[] = [];
 
-    if (!input.recent_messages || input.recent_messages.length === 0) {
+  console.log("🧨 CM LOADED + RUNNING");
+  console.log("🧨 CM EVENT TYPE =", input?.event?.type);
+  console.log("🧨 CM EVENT PAYLOAD =", input?.event?.payload);
+
+  // SYSTEM EVENTS MUST RUN FIRST
+  if (input.event.type === "booking.confirmed") {
+    console.log("✅ HIT booking.confirmed BRANCH");
+
+    const { booking_id, lead_id } = input.event.payload ?? {};
+
+    if (!booking_id || !lead_id) {
+      console.log("❌ missing booking_id or lead_id");
       return {
         ok: true,
         agent: "conversationManager",
         client_id: input.client_id,
-        data: {
-          version: "v1",
-          event_type: input.event.type,
-          lead_id: input.lead?.id,
-          actions: [],
-          reasoning: {
-            summary: "No messages to process",
-          },
-        },
+        data: { actions },
       };
     }
 
-    // ✅ FIX: only pass what the agent accepts
-    const qualification = qualificationAgent({
-      recent_messages: input.recent_messages,
+    const { data: booking } = await supabaseAdmin
+      .from("bookings")
+      .select("id, start_time, service_type")
+      .eq("id", booking_id)
+      .eq("client_id", input.client_id)
+      .single();
+
+    const { data: lead } = await supabaseAdmin
+      .from("leads")
+      .select("id, phone")
+      .eq("id", lead_id)
+      .eq("client_id", input.client_id)
+      .single();
+
+    console.log("🧾 booking =", booking);
+    console.log("🧾 lead =", lead);
+
+    if (!booking || !lead || !lead.phone) {
+      console.log("❌ booking/lead missing or lead.phone null");
+      return {
+        ok: true,
+        agent: "conversationManager",
+        client_id: input.client_id,
+        data: { actions },
+      };
+    }
+
+    const start = new Date(booking.start_time).toLocaleString();
+    const service = booking.service_type ?? "appointment";
+
+    actions.push({
+      type: "QUEUE_MESSAGE",
+      channel: "sms",
+      body: `Your ${service} is confirmed for ${start}. Reply CANCEL to cancel.`,
+      reason: "booking_confirmation",
+      lead_id: lead.id,
     });
 
-    if (qualification.status === "needs_info") {
-      if (qualification.next_question) {
-        actions.push({
-          type: "QUEUE_MESSAGE",
-          channel: "sms",
-          to: input.lead?.phone,
-          body: qualification.next_question,
-          reason: "qualification_missing_info",
-          lead_id: input.lead?.id,
-        });
-      }
-
-      return {
-        ok: true,
-        agent: "conversationManager",
-        client_id: input.client_id,
-        lead_id: input.lead?.id,
-        data: {
-          version: "v1",
-          event_type: input.event.type,
-          lead_id: input.lead?.id,
-          actions,
-          reasoning: {
-            summary: "Lead requires additional qualification",
-            signals: qualification,
-          },
-        },
-      };
-    }
-
-    if (qualification.status === "qualified") {
-      actions.push({
-        type: "SET_STAGE",
-        stage: "booking",
-        reason: "lead_qualified",
-      });
-
-      actions.push({
-        type: "CALL_AGENT",
-        agent: "booking",
-        reason: "lead qualified, proceed to booking",
-        input: {},
-      });
-
-      return {
-        ok: true,
-        agent: "conversationManager",
-        client_id: input.client_id,
-        lead_id: input.lead?.id,
-        data: {
-          version: "v1",
-          event_type: input.event.type,
-          lead_id: input.lead?.id,
-          actions,
-          reasoning: {
-            summary: "Lead qualified, routing to booking",
-            signals: qualification,
-          },
-        },
-      };
-    }
+    await supabaseAdmin.from("ai_actions").insert({
+      client_id: input.client_id,
+      lead_id: lead.id,
+      action_type: "booking_confirmation_sent",
+      payload: { booking_id },
+      status: "success",
+    });
 
     return {
       ok: true,
       agent: "conversationManager",
       client_id: input.client_id,
-      lead_id: input.lead?.id,
-      data: {
-        version: "v1",
-        event_type: input.event.type,
-        lead_id: input.lead?.id,
-        actions: [],
-        reasoning: {
-          summary: "Lead unqualified",
-          signals: qualification,
-        },
-      },
-    };
-  } catch (err: any) {
-    return {
-      ok: false,
-      agent: "conversationManager",
-      client_id: input.client_id,
-      error: {
-        code: "CONVERSATION_MANAGER_ERROR",
-        message: err?.message ?? "Unknown error",
-      },
+      data: { actions },
     };
   }
+
+  // USER MESSAGE GUARD (SYSTEM EVENTS ALREADY HANDLED)
+  if (!input.recent_messages || input.recent_messages.length === 0) {
+    console.log("🟡 CM EARLY RETURN: no recent_messages");
+    return {
+      ok: true,
+      agent: "conversationManager",
+      client_id: input.client_id,
+      data: { actions },
+    };
+  }
+
+  console.log("🟡 CM NORMAL FLOW (not implemented in this debug file)");
+  return {
+    ok: true,
+    agent: "conversationManager",
+    client_id: input.client_id,
+    data: { actions },
+  };
 }
