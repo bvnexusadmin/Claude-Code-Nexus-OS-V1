@@ -1,15 +1,21 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "../lib/supabase";
+import { useTenant } from "../lib/tenant";
+import { apiPost } from "../lib/api";
 
 type Message = {
   id: string;
+  lead_id: string;
+  client_id: string;
   direction: "inbound" | "outbound" | string;
   content: string;
+  created_at?: string;
 };
 
 const Conversation: React.FC = () => {
   const { leadId } = useParams<{ leadId: string }>();
+  const { activeClientId, loadingMe } = useTenant();
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [message, setMessage] = useState("");
@@ -19,45 +25,64 @@ const Conversation: React.FC = () => {
   const [replyChannel, setReplyChannel] = useState<"sms" | "email">("sms");
 
   /* =====================
-     LOAD + REALTIME
+     LOAD + REALTIME (TENANT-SCOPED)
   ===================== */
   useEffect(() => {
+    if (loadingMe) return;
     if (!leadId) return;
 
+    if (!activeClientId) {
+      setMessages([]);
+      setLeadEmail(null);
+      return;
+    }
+
+    let cancelled = false;
+
     const loadMessagesAndLead = async () => {
-      // Load messages
-      const { data: msgData } = await supabase
+      const { data: msgData, error: msgErr } = await supabase
         .from("messages")
-        .select("id, direction, content")
+        .select("id, lead_id, client_id, direction, content, created_at")
+        .eq("client_id", activeClientId)
         .eq("lead_id", leadId)
         .order("created_at", { ascending: true });
 
-      setMessages(msgData ?? []);
+      if (!cancelled) {
+        if (!msgErr) setMessages((msgData as Message[]) ?? []);
+      }
 
-      // Load lead email
-      const { data: lead } = await supabase
+      const { data: lead, error: leadErr } = await supabase
         .from("leads")
         .select("email")
+        .eq("client_id", activeClientId)
         .eq("id", leadId)
         .single();
 
-      setLeadEmail(lead?.email ?? null);
+      if (!cancelled) {
+        if (!leadErr) setLeadEmail(lead?.email ?? null);
+        else setLeadEmail(null);
+      }
     };
 
     loadMessagesAndLead();
 
     const channel = supabase
-      .channel(`conversation-${leadId}`)
+      .channel(`conversation-${activeClientId}-${leadId}`)
       .on(
         "postgres_changes",
         {
           event: "INSERT",
           schema: "public",
           table: "messages",
-          filter: `lead_id=eq.${leadId}`,
+          filter: `client_id=eq.${activeClientId},lead_id=eq.${leadId}`,
         },
         (payload) => {
           const msg = payload.new as Message;
+
+          if (!msg.lead_id) return;
+          if (msg.lead_id !== leadId) return;
+          if (msg.client_id !== activeClientId) return;
+
           setMessages((prev) =>
             prev.find((m) => m.id === msg.id) ? prev : [...prev, msg]
           );
@@ -66,15 +91,21 @@ const Conversation: React.FC = () => {
       .subscribe();
 
     return () => {
+      cancelled = true;
       supabase.removeChannel(channel);
     };
-  }, [leadId]);
+  }, [leadId, activeClientId, loadingMe]);
 
   /* =====================
-     SEND MESSAGE
+     SEND MESSAGE (apiPost handles JWT + tenant header)
   ===================== */
   const sendMessage = async () => {
     if (!message.trim() || !leadId) return;
+
+    if (!activeClientId) {
+      alert("No active tenant selected.");
+      return;
+    }
 
     if (replyChannel === "email" && !leadEmail) {
       alert("This lead has no email address.");
@@ -84,47 +115,18 @@ const Conversation: React.FC = () => {
     setSending(true);
 
     try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
-      if (!session?.access_token) {
-        throw new Error("Not authenticated");
-      }
-
-      const headers = {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${session.access_token}`,
-      };
-
-      let res: Response;
-
       if (replyChannel === "sms") {
-        res = await fetch("http://localhost:4000/internal/send-message", {
-          method: "POST",
-          headers,
-          body: JSON.stringify({
-            lead_id: leadId,
-            content: message,
-          }),
+        await apiPost("/internal/send-message", {
+          lead_id: leadId,
+          content: message,
         });
       } else {
-        res = await fetch("http://localhost:4000/internal/email/send", {
-          method: "POST",
-          headers,
-          body: JSON.stringify({
-            lead_id: leadId,
-            to: leadEmail,
-            subject: subject || "Re:",
-            content: message,
-          }),
+        await apiPost("/internal/email/send", {
+          lead_id: leadId,
+          to: leadEmail,
+          subject: subject || "Re:",
+          content: message,
         });
-      }
-
-      const data = await res.json();
-
-      if (!res.ok || !data.ok) {
-        throw new Error(data.error || "Send failed");
       }
 
       setMessage("");
@@ -141,6 +143,11 @@ const Conversation: React.FC = () => {
     <div>
       <h2>Conversation</h2>
       <p>Lead ID: {leadId}</p>
+      {activeClientId && (
+        <p style={{ fontSize: "12px", opacity: 0.8 }}>
+          Tenant: {activeClientId.slice(0, 8)}
+        </p>
+      )}
       {leadEmail && <p>Email: {leadEmail}</p>}
 
       <ul>
@@ -188,6 +195,7 @@ const Conversation: React.FC = () => {
         onChange={(e) => setMessage(e.target.value)}
         placeholder={`Type your ${replyChannel.toUpperCase()} reply...`}
         rows={3}
+        style={{ width: "100%" }}
       />
 
       <br />

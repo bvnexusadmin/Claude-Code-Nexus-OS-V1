@@ -7,6 +7,7 @@ import Inbox from "./pages/Inbox";
 import Conversation from "./pages/Conversation";
 import Bookings from "./pages/Bookings";
 import Leads from "./pages/Leads";
+import LeadProfile from "./pages/LeadProfile";
 import Settings from "./pages/Settings";
 
 import AppLayout from "./layout/AppLayout";
@@ -39,7 +40,11 @@ const App: React.FC = () => {
           <Route path="inbox" element={<Inbox />} />
           <Route path="inbox/:leadId" element={<Conversation />} />
           <Route path="bookings" element={<Bookings />} />
+
+          {/* Leads */}
           <Route path="leads" element={<Leads />} />
+          <Route path="leads/:leadId" element={<LeadProfile />} />
+
           <Route path="settings" element={<Settings />} />
         </Route>
 
