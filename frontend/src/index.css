@@ -1,24 +1,16 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-/* ── Design tokens ──────────────────────────────────────────────────────── */
 :root {
-  /* Background scale */
   --color-bg-base: #0a0e1a;
   --color-bg-surface: #111827;
   --color-bg-elevated: #1a2235;
   --color-bg-border: #1e2d40;
-
-  /* Accent */
   --color-accent: #0ea5e9;
   --color-accent-hover: #38bdf8;
   --color-accent-muted: rgba(14, 165, 233, 0.12);
-
-  /* Text */
   --color-text-primary: #f0f4f8;
   --color-text-secondary: #8899aa;
   --color-text-muted: #4a5a6b;
-
-  /* Status */
   --color-success: #10b981;
   --color-success-bg: rgba(16, 185, 129, 0.12);
   --color-success-border: rgba(16, 185, 129, 0.3);
@@ -26,65 +18,57 @@
   --color-danger: #ef4444;
   --color-info: #6366f1;
 
-  /* ── Legacy aliases (used by existing components) ─────────────────────── */
-  --bg-page: var(--color-bg-base);
-  --bg-sidebar: var(--color-bg-surface);
-  --bg-card: var(--color-bg-elevated);
-  --border: var(--color-bg-border);
-  --border-card: var(--color-bg-border);
-  --text-primary: var(--color-text-primary);
-  --text-secondary: var(--color-text-secondary);
-  --text-muted: var(--color-text-muted);
-  --accent: var(--color-accent);
-  --accent-light: var(--color-accent-muted);
-  --radius-card: 12px;
+  /* Legacy aliases */
+  --bg-page: #0a0e1a;
+  --bg-sidebar: #0a0e1a;
+  --bg-card: #111827;
+  --border: #1e2d40;
+  --border-card: #1e2d40;
+  --text-primary: #f0f4f8;
+  --text-secondary: #8899aa;
+  --text-muted: #4a5a6b;
+  --accent: #0ea5e9;
+  --accent-light: rgba(14, 165, 233, 0.12);
+  --radius-card: 10px;
 }
 
-/* ── Reset ──────────────────────────────────────────────────────────────── */
 *, *::before, *::after {
   box-sizing: border-box;
 }
 
-/* ── Root anchors — force dark background at every level ────────────────── */
-html {
-  background-color: var(--color-bg-base);
-  color: var(--color-text-primary);
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  background-color: #0a0e1a !important;
+  color: #f0f4f8;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  height: 100%;
 }
 
 #root {
-  background-color: var(--color-bg-base);
-  color: var(--color-text-primary);
-  min-height: 100vh;
-}
-
-/* ── Base ───────────────────────────────────────────────────────────────── */
-body {
-  margin: 0;
-  font-family: 'Inter', 'DM Sans', system-ui, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background-color: var(--color-bg-base);
-  color: var(--color-text-primary);
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 1.5;
-}
-
-a {
-  text-decoration: none;
+  height: 100%;
 }
 
 h1, h2, h3, h4, h5, h6 {
   margin: 0;
-  font-weight: 500;
+  font-weight: 600;
+  color: #f0f4f8;
 }
 
-p {
-  margin: 0;
-}
+p { margin: 0; }
 
-/* ── Scrollbar ──────────────────────────────────────────────────────────── */
+a { color: #0ea5e9; text-decoration: none; }
+a:hover { color: #38bdf8; }
+
 ::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: var(--color-bg-base); }
-::-webkit-scrollbar-thumb { background: var(--color-bg-border); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--color-text-secondary); }
+::-webkit-scrollbar-track { background: #0a0e1a; }
+::-webkit-scrollbar-thumb { background: #1e2d40; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #8899aa; }

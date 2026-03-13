@@ -191,15 +191,15 @@ const AppLayout: React.FC = () => {
         refreshMe,
       }}
     >
-      <div style={{ display: "flex", height: "100vh", overflow: "hidden" }}>
+      <div style={{ display: "flex", height: "100vh", overflow: "hidden", background: "#0a0e1a" }}>
 
         {/* ── Sidebar ─────────────────────────────────────────────────── */}
         <aside
           style={{
             width: "220px",
             flexShrink: 0,
-            background: "var(--bg-sidebar)",
-            borderRight: "0.5px solid var(--border)",
+            background: "#0a0e1a",
+            borderRight: "1px solid #1e2d40",
             display: "flex",
             flexDirection: "column",
             height: "100vh",
@@ -211,12 +211,12 @@ const AppLayout: React.FC = () => {
           }}
         >
           {/* Logo */}
-          <div style={{ padding: "20px 20px 18px" }}>
+          <div style={{ padding: "20px 16px 16px" }}>
             <div
               style={{
-                fontSize: "15px",
-                fontWeight: 500,
-                color: "var(--text-primary)",
+                fontSize: "16px",
+                fontWeight: 700,
+                color: "#f0f4f8",
                 letterSpacing: "-0.01em",
               }}
             >
@@ -224,9 +224,9 @@ const AppLayout: React.FC = () => {
             </div>
             <div
               style={{
-                fontSize: "11px",
-                color: "var(--text-muted)",
-                marginTop: "2px",
+                fontSize: "12px",
+                color: "#8899aa",
+                marginTop: "3px",
               }}
             >
               Brautigam Ventures
@@ -235,8 +235,8 @@ const AppLayout: React.FC = () => {
 
           <div
             style={{
-              height: "0.5px",
-              background: "var(--border)",
+              height: "1px",
+              background: "#1e2d40",
               margin: "0",
             }}
           />
@@ -245,7 +245,7 @@ const AppLayout: React.FC = () => {
           <nav
             style={{
               flex: 1,
-              padding: "10px 0",
+              padding: "8px 0",
               display: "flex",
               flexDirection: "column",
               overflow: "hidden",
@@ -260,16 +260,17 @@ const AppLayout: React.FC = () => {
                   display: "flex",
                   alignItems: "center",
                   gap: "10px",
-                  padding: "9px 20px",
-                  fontSize: "13.5px",
-                  fontWeight: 400,
-                  color: isActive ? "var(--accent)" : "var(--text-secondary)",
-                  background: isActive ? "var(--accent-light)" : "transparent",
-                  borderRight: isActive
-                    ? "3px solid var(--accent)"
-                    : "3px solid transparent",
+                  padding: "10px 16px",
+                  margin: "2px 8px",
+                  borderRadius: "7px",
+                  fontSize: "14px",
+                  fontWeight: 500,
+                  color: isActive ? "#0ea5e9" : "#8899aa",
+                  background: isActive ? "rgba(14, 165, 233, 0.12)" : "transparent",
+                  borderLeft: isActive ? "2px solid #0ea5e9" : "2px solid transparent",
                   cursor: "pointer",
-                  transition: "background 0.1s, color 0.1s",
+                  transition: "all 0.15s ease",
+                  textDecoration: "none",
                 })}
               >
                 <Icon d={item.icon} size={15} />
@@ -280,22 +281,22 @@ const AppLayout: React.FC = () => {
 
           <div
             style={{
-              height: "0.5px",
-              background: "var(--border)",
+              height: "1px",
+              background: "#1e2d40",
             }}
           />
 
           {/* Client / User info */}
-          <div style={{ padding: "14px 20px" }}>
+          <div style={{ padding: "16px" }}>
             {loadingMe ? (
-              <div style={{ fontSize: "12px", color: "var(--text-muted)" }}>
+              <div style={{ fontSize: "12px", color: "#4a5a6b" }}>
                 Loading…
               </div>
             ) : meError ? (
               <div
                 style={{
                   fontSize: "11px",
-                  color: "var(--color-danger)",
+                  color: "#ef4444",
                   whiteSpace: "pre-wrap",
                 }}
               >
@@ -305,9 +306,9 @@ const AppLayout: React.FC = () => {
               <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
                 <div
                   style={{
-                    fontSize: "12px",
-                    fontWeight: 500,
-                    color: "var(--text-primary)",
+                    fontSize: "13px",
+                    fontWeight: 600,
+                    color: "#f0f4f8",
                     overflow: "hidden",
                     textOverflow: "ellipsis",
                     whiteSpace: "nowrap",
@@ -315,7 +316,7 @@ const AppLayout: React.FC = () => {
                 >
                   {clientName}
                 </div>
-                <div style={{ fontSize: "11px", color: "var(--text-muted)" }}>
+                <div style={{ fontSize: "12px", color: "#8899aa" }}>
                   {activeRole ?? "—"}
                 </div>
               </div>
@@ -329,12 +330,12 @@ const AppLayout: React.FC = () => {
                 style={{
                   marginTop: "8px",
                   width: "100%",
-                  padding: "5px 8px",
-                  fontSize: "11px",
-                  border: "0.5px solid var(--border)",
+                  padding: "6px 8px",
+                  fontSize: "12px",
+                  border: "1px solid #1e2d40",
                   borderRadius: "6px",
-                  background: "var(--bg-page)",
-                  color: "var(--text-secondary)",
+                  background: "#111827",
+                  color: "#8899aa",
                   cursor: "pointer",
                 }}
               >
@@ -351,12 +352,12 @@ const AppLayout: React.FC = () => {
               style={{
                 marginTop: "10px",
                 width: "100%",
-                padding: "7px 12px",
+                padding: "8px 12px",
                 fontSize: "12px",
-                fontWeight: 400,
-                color: "var(--text-secondary)",
+                fontWeight: 500,
+                color: "#8899aa",
                 background: "transparent",
-                border: "0.5px solid var(--border)",
+                border: "1px solid #1e2d40",
                 borderRadius: "6px",
                 cursor: "pointer",
                 textAlign: "left",
@@ -376,16 +377,17 @@ const AppLayout: React.FC = () => {
             flexDirection: "column",
             height: "100vh",
             overflow: "hidden",
+            background: "#0a0e1a",
           }}
         >
           {/* Top bar */}
           <header
             style={{
-              height: "52px",
+              height: "56px",
               flexShrink: 0,
-              background: "var(--bg-card)",
-              borderBottom: "0.5px solid var(--border)",
-              padding: "0 24px",
+              background: "#111827",
+              borderBottom: "1px solid #1e2d40",
+              padding: "0 28px",
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
@@ -393,9 +395,9 @@ const AppLayout: React.FC = () => {
           >
             <h1
               style={{
-                fontSize: "15px",
-                fontWeight: 500,
-                color: "var(--text-primary)",
+                fontSize: "16px",
+                fontWeight: 600,
+                color: "#f0f4f8",
               }}
             >
               {pageTitle}
@@ -408,13 +410,13 @@ const AppLayout: React.FC = () => {
                   display: "inline-flex",
                   alignItems: "center",
                   gap: "5px",
-                  background: "var(--color-success-bg)",
-                  color: "var(--color-success)",
+                  background: "rgba(16, 185, 129, 0.12)",
+                  color: "#10b981",
                   fontSize: "11px",
-                  fontWeight: 500,
+                  fontWeight: 600,
                   padding: "4px 10px",
                   borderRadius: "999px",
-                  border: "0.5px solid var(--color-success-border)",
+                  border: "1px solid rgba(16, 185, 129, 0.3)",
                 }}
               >
                 <span
@@ -422,7 +424,7 @@ const AppLayout: React.FC = () => {
                     width: "6px",
                     height: "6px",
                     borderRadius: "50%",
-                    background: "var(--color-success)",
+                    background: "#10b981",
                     display: "inline-block",
                   }}
                 />
@@ -433,16 +435,16 @@ const AppLayout: React.FC = () => {
               <div
                 title={userEmail}
                 style={{
-                  width: "30px",
-                  height: "30px",
+                  width: "32px",
+                  height: "32px",
                   borderRadius: "50%",
-                  background: "var(--accent)",
-                  color: "var(--color-text-primary)",
+                  background: "#0ea5e9",
+                  color: "#0a0e1a",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  fontSize: "12px",
-                  fontWeight: 500,
+                  fontSize: "13px",
+                  fontWeight: 700,
                   flexShrink: 0,
                   cursor: "default",
                 }}
@@ -457,7 +459,7 @@ const AppLayout: React.FC = () => {
             style={{
               flex: 1,
               overflow: "auto",
-              background: "var(--bg-page)",
+              background: "#0a0e1a",
             }}
           >
             <Outlet />

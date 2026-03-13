@@ -105,16 +105,16 @@ const Inbox: React.FC = () => {
   }, [activeClientId, loadingMe]);
 
   return (
-    <div>
-      <h2>Inbox</h2>
-      <p>Unified conversations (SMS · Email · Voice).</p>
+    <div style={{ padding: "24px" }}>
+      <h2 style={{ color: "#f0f4f8", marginBottom: "4px" }}>Inbox</h2>
+      <p style={{ color: "#8899aa", fontSize: "13px", marginBottom: "20px" }}>Unified conversations (SMS · Email · Voice).</p>
 
       {!activeClientId ? (
-        <div style={{ fontSize: "12px", opacity: 0.8 }}>
+        <div style={{ fontSize: "12px", color: "#4a5a6b" }}>
           No active tenant selected.
         </div>
       ) : (
-        <ul>
+        <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
           {Object.values(conversations)
             .sort(
               (a, b) =>
@@ -122,13 +122,21 @@ const Inbox: React.FC = () => {
                 new Date(a.created_at).getTime()
             )
             .map((c) => (
-              <li key={c.lead_id}>
-                <Link to={`/inbox/${c.lead_id}`}>
-                  <strong>
+              <li
+                key={c.lead_id}
+                style={{
+                  border: "1px solid #1e2d40",
+                  borderRadius: "8px",
+                  padding: "14px 16px",
+                  marginBottom: "8px",
+                  background: "#111827",
+                }}
+              >
+                <Link to={`/inbox/${c.lead_id}`} style={{ textDecoration: "none" }}>
+                  <div style={{ fontWeight: 600, color: "#f0f4f8", fontSize: "14px", marginBottom: "4px" }}>
                     Lead {c.lead_id.slice(0, 8)} ({c.channel})
-                  </strong>
-                  <br />
-                  <span>{c.last_message}</span>
+                  </div>
+                  <div style={{ fontSize: "12px", color: "#8899aa" }}>{c.last_message}</div>
                 </Link>
               </li>
             ))}

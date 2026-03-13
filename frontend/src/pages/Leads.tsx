@@ -175,26 +175,43 @@ const Leads: React.FC = () => {
   }, [leads, lastByLead, q, status]);
 
   return (
-    <div>
-      <h2>Leads</h2>
-      <p>All captured leads across channels.</p>
+    <div style={{ padding: "24px" }}>
+      <h2 style={{ color: "#f0f4f8", marginBottom: "4px" }}>Leads</h2>
+      <p style={{ color: "#8899aa", fontSize: "13px", marginBottom: "20px" }}>All captured leads across channels.</p>
 
       {!activeClientId ? (
-        <div style={{ fontSize: "12px", opacity: 0.8 }}>No active tenant selected.</div>
+        <div style={{ fontSize: "12px", color: "#4a5a6b" }}>No active tenant selected.</div>
       ) : (
         <>
-          <div style={{ display: "flex", gap: "8px", marginBottom: "12px" }}>
+          <div style={{ display: "flex", gap: "8px", marginBottom: "16px" }}>
             <input
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search name, phone, email, service, urgency, message…"
-              style={{ flex: 1, padding: "8px" }}
+              style={{
+                flex: 1,
+                padding: "9px 12px",
+                fontSize: "13px",
+                color: "#f0f4f8",
+                background: "#111827",
+                border: "1px solid #1e2d40",
+                borderRadius: "7px",
+                outline: "none",
+              }}
             />
 
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value)}
-              style={{ padding: "8px" }}
+              style={{
+                padding: "9px 12px",
+                fontSize: "13px",
+                color: "#f0f4f8",
+                background: "#111827",
+                border: "1px solid #1e2d40",
+                borderRadius: "7px",
+                cursor: "pointer",
+              }}
             >
               <option value="all">All</option>
               <option value="new">New</option>
@@ -206,16 +223,24 @@ const Leads: React.FC = () => {
 
             <button
               onClick={() => window.location.reload()}
-              style={{ padding: "8px" }}
+              style={{
+                padding: "9px 14px",
+                fontSize: "13px",
+                color: "#8899aa",
+                background: "transparent",
+                border: "1px solid #1e2d40",
+                borderRadius: "7px",
+                cursor: "pointer",
+              }}
               disabled={loading}
             >
               Refresh
             </button>
           </div>
 
-          {loading && <div style={{ fontSize: "12px" }}>Loading…</div>}
+          {loading && <div style={{ fontSize: "12px", color: "#8899aa" }}>Loading…</div>}
           {error && (
-            <div style={{ fontSize: "12px", color: "var(--color-danger)", whiteSpace: "pre-wrap" }}>
+            <div style={{ fontSize: "12px", color: "#ef4444", whiteSpace: "pre-wrap" }}>
               {error}
             </div>
           )}
@@ -225,46 +250,47 @@ const Leads: React.FC = () => {
               <li
                 key={l.id}
                 style={{
-                  border: "1px solid var(--color-bg-border)",
+                  border: "1px solid #1e2d40",
                   borderRadius: "8px",
-                  padding: "12px",
-                  marginBottom: "10px",
+                  padding: "14px 16px",
+                  marginBottom: "8px",
+                  background: "#111827",
                 }}
               >
                 <Link to={`/leads/${l.id}`} style={{ textDecoration: "none" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", gap: "12px" }}>
                     <div>
-                      <div style={{ fontWeight: 700 }}>{l.name}</div>
-                      <div style={{ fontSize: "12px", opacity: 0.85 }}>
+                      <div style={{ fontWeight: 600, color: "#f0f4f8", fontSize: "14px" }}>{l.name}</div>
+                      <div style={{ fontSize: "12px", color: "#8899aa" }}>
                         {l.phone ?? "No phone"} · {l.email ?? "No email"}
                       </div>
 
-                      <div style={{ fontSize: "12px", opacity: 0.85, marginTop: "4px" }}>
-                        <strong>Service:</strong> {l.service_type ?? "—"} ·{" "}
-                        <strong>Urgency:</strong> {l.urgency ?? "—"} ·{" "}
-                        <strong>Qual:</strong> {l.qualification_status ?? "—"}
+                      <div style={{ fontSize: "12px", color: "#8899aa", marginTop: "4px" }}>
+                        <strong style={{ color: "#8899aa" }}>Service:</strong> {l.service_type ?? "—"} ·{" "}
+                        <strong style={{ color: "#8899aa" }}>Urgency:</strong> {l.urgency ?? "—"} ·{" "}
+                        <strong style={{ color: "#8899aa" }}>Qual:</strong> {l.qualification_status ?? "—"}
                       </div>
                     </div>
 
                     <div style={{ textAlign: "right" }}>
-                      <div style={{ fontSize: "12px", fontWeight: 700 }}>
+                      <div style={{ fontSize: "12px", fontWeight: 700, color: "#f0f4f8" }}>
                         {l.status.toUpperCase()}
                       </div>
-                      <div style={{ fontSize: "12px", opacity: 0.75 }}>
+                      <div style={{ fontSize: "12px", color: "#8899aa" }}>
                         {l.last_message_at
                           ? new Date(l.last_message_at).toLocaleString()
                           : l.created_at
                           ? new Date(l.created_at).toLocaleString()
                           : ""}
                       </div>
-                      <div style={{ fontSize: "12px", opacity: 0.75, marginTop: "4px" }}>
+                      <div style={{ fontSize: "12px", color: "#8899aa", marginTop: "4px" }}>
                         {l.source ? `Source: ${l.source}` : ""}
                       </div>
                     </div>
                   </div>
 
-                  <div style={{ marginTop: "8px", fontSize: "12px", opacity: 0.9 }}>
-                    <span style={{ fontWeight: 700 }}>
+                  <div style={{ marginTop: "8px", fontSize: "12px", color: "#8899aa" }}>
+                    <span style={{ fontWeight: 700, color: "#f0f4f8" }}>
                       {l.last_channel ? l.last_channel.toUpperCase() : "—"}
                     </span>{" "}
                     {l.last_message_preview ? `· ${l.last_message_preview}` : ""}
@@ -275,7 +301,7 @@ const Leads: React.FC = () => {
           </ul>
 
           {items.length === 0 && !loading && (
-            <div style={{ fontSize: "12px", opacity: 0.8 }}>No leads found.</div>
+            <div style={{ fontSize: "12px", color: "#4a5a6b" }}>No leads found.</div>
           )}
         </>
       )}

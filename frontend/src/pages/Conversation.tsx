@@ -140,27 +140,39 @@ const Conversation: React.FC = () => {
   };
 
   return (
-    <div>
-      <h2>Conversation</h2>
-      <p>Lead ID: {leadId}</p>
+    <div style={{ padding: "24px" }}>
+      <h2 style={{ color: "#f0f4f8", marginBottom: "4px" }}>Conversation</h2>
+      <p style={{ fontSize: "12px", color: "#8899aa", marginBottom: "4px" }}>Lead ID: {leadId}</p>
       {activeClientId && (
-        <p style={{ fontSize: "12px", opacity: 0.8 }}>
+        <p style={{ fontSize: "12px", color: "#8899aa", marginBottom: "4px" }}>
           Tenant: {activeClientId.slice(0, 8)}
         </p>
       )}
-      {leadEmail && <p>Email: {leadEmail}</p>}
+      {leadEmail && <p style={{ fontSize: "12px", color: "#8899aa", marginBottom: "16px" }}>Email: {leadEmail}</p>}
 
-      <ul>
+      <ul style={{ listStyle: "none", padding: 0, margin: "0 0 16px 0" }}>
         {messages.map((m) => (
-          <li key={m.id}>
-            [{m.direction}] {m.content}
+          <li
+            key={m.id}
+            style={{
+              border: "1px solid #1e2d40",
+              borderRadius: "8px",
+              padding: "12px",
+              marginBottom: "8px",
+              background: "#111827",
+              color: "#f0f4f8",
+              fontSize: "13px",
+            }}
+          >
+            <span style={{ fontSize: "11px", color: "#8899aa", marginRight: "8px" }}>[{m.direction}]</span>
+            {m.content}
           </li>
         ))}
       </ul>
 
       {/* CHANNEL SELECTOR */}
-      <div style={{ marginBottom: "8px" }}>
-        <label style={{ marginRight: "12px" }}>
+      <div style={{ marginBottom: "10px", display: "flex", gap: "16px" }}>
+        <label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "13px", color: "#8899aa", cursor: "pointer" }}>
           <input
             type="radio"
             checked={replyChannel === "sms"}
@@ -169,7 +181,7 @@ const Conversation: React.FC = () => {
           SMS
         </label>
 
-        <label>
+        <label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "13px", color: "#8899aa", cursor: "pointer" }}>
           <input
             type="radio"
             checked={replyChannel === "email"}
@@ -186,7 +198,17 @@ const Conversation: React.FC = () => {
           value={subject}
           onChange={(e) => setSubject(e.target.value)}
           placeholder="Email subject"
-          style={{ width: "100%", marginBottom: "6px" }}
+          style={{
+            width: "100%",
+            marginBottom: "8px",
+            padding: "9px 12px",
+            fontSize: "13px",
+            color: "#f0f4f8",
+            background: "#111827",
+            border: "1px solid #1e2d40",
+            borderRadius: "7px",
+            outline: "none",
+          }}
         />
       )}
 
@@ -195,12 +217,37 @@ const Conversation: React.FC = () => {
         onChange={(e) => setMessage(e.target.value)}
         placeholder={`Type your ${replyChannel.toUpperCase()} reply...`}
         rows={3}
-        style={{ width: "100%" }}
+        style={{
+          width: "100%",
+          padding: "9px 12px",
+          fontSize: "13px",
+          color: "#f0f4f8",
+          background: "#111827",
+          border: "1px solid #1e2d40",
+          borderRadius: "7px",
+          outline: "none",
+          resize: "vertical",
+        }}
       />
 
       <br />
 
-      <button onClick={sendMessage} disabled={sending}>
+      <button
+        onClick={sendMessage}
+        disabled={sending}
+        style={{
+          marginTop: "10px",
+          padding: "9px 20px",
+          fontSize: "13px",
+          fontWeight: 600,
+          color: "#0a0e1a",
+          background: sending ? "rgba(14,165,233,0.5)" : "#0ea5e9",
+          border: "none",
+          borderRadius: "7px",
+          cursor: sending ? "not-allowed" : "pointer",
+          transition: "background 0.15s",
+        }}
+      >
         {sending ? "Sending..." : "Send"}
       </button>
     </div>

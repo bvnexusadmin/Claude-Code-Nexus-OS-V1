@@ -126,25 +126,25 @@ const LeadProfile: React.FC = () => {
   }, [lead]);
 
   return (
-    <div>
-      <div style={{ display: "flex", justifyContent: "space-between", gap: "12px" }}>
+    <div style={{ padding: "24px" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", gap: "12px", marginBottom: "16px" }}>
         <div>
-          <h2 style={{ marginBottom: "4px" }}>{title}</h2>
-          <div style={{ fontSize: "12px", opacity: 0.8 }}>
+          <h2 style={{ marginBottom: "4px", color: "#f0f4f8" }}>{title}</h2>
+          <div style={{ fontSize: "12px", color: "#8899aa" }}>
             Lead ID: {leadId}
             {activeClientId ? ` · Tenant: ${activeClientId.slice(0, 8)}` : ""}
           </div>
         </div>
 
         <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-          <Link to="/leads">← Back to Leads</Link>
-          <Link to={`/inbox/${leadId}`}>Open Conversation →</Link>
+          <Link to="/leads" style={{ color: "#0ea5e9", fontSize: "13px" }}>← Back to Leads</Link>
+          <Link to={`/inbox/${leadId}`} style={{ color: "#0ea5e9", fontSize: "13px" }}>Open Conversation →</Link>
         </div>
       </div>
 
-      {loading && <div style={{ fontSize: "12px" }}>Loading…</div>}
+      {loading && <div style={{ fontSize: "12px", color: "#8899aa" }}>Loading…</div>}
       {error && (
-        <div style={{ fontSize: "12px", color: "var(--color-danger)", whiteSpace: "pre-wrap" }}>
+        <div style={{ fontSize: "12px", color: "#ef4444", whiteSpace: "pre-wrap" }}>
           {error}
         </div>
       )}
@@ -152,85 +152,87 @@ const LeadProfile: React.FC = () => {
       {lead && (
         <div
           style={{
-            border: "1px solid var(--color-bg-border)",
+            border: "1px solid #1e2d40",
             borderRadius: "8px",
-            padding: "12px",
+            padding: "16px",
             marginTop: "12px",
+            background: "#111827",
           }}
         >
           <div style={{ display: "flex", flexWrap: "wrap", gap: "18px" }}>
             <div>
-              <div style={{ fontSize: "12px", opacity: 0.75 }}>Name</div>
-              <div style={{ fontWeight: 700 }}>{(lead.name ?? "").trim() || "Unnamed Lead"}</div>
+              <div style={{ fontSize: "11px", color: "#8899aa", textTransform: "uppercase", letterSpacing: "0.05em" }}>Name</div>
+              <div style={{ fontWeight: 600, color: "#f0f4f8", marginTop: "2px" }}>{(lead.name ?? "").trim() || "Unnamed Lead"}</div>
             </div>
 
             <div>
-              <div style={{ fontSize: "12px", opacity: 0.75 }}>Phone</div>
-              <div style={{ fontWeight: 700 }}>{lead.phone ?? "—"}</div>
+              <div style={{ fontSize: "11px", color: "#8899aa", textTransform: "uppercase", letterSpacing: "0.05em" }}>Phone</div>
+              <div style={{ fontWeight: 600, color: "#f0f4f8", marginTop: "2px" }}>{lead.phone ?? "—"}</div>
             </div>
 
             <div>
-              <div style={{ fontSize: "12px", opacity: 0.75 }}>Email</div>
-              <div style={{ fontWeight: 700 }}>{lead.email ?? "—"}</div>
+              <div style={{ fontSize: "11px", color: "#8899aa", textTransform: "uppercase", letterSpacing: "0.05em" }}>Email</div>
+              <div style={{ fontWeight: 600, color: "#f0f4f8", marginTop: "2px" }}>{lead.email ?? "—"}</div>
             </div>
 
             <div>
-              <div style={{ fontSize: "12px", opacity: 0.75 }}>Source</div>
-              <div style={{ fontWeight: 700 }}>{lead.source ?? "—"}</div>
+              <div style={{ fontSize: "11px", color: "#8899aa", textTransform: "uppercase", letterSpacing: "0.05em" }}>Source</div>
+              <div style={{ fontWeight: 600, color: "#f0f4f8", marginTop: "2px" }}>{lead.source ?? "—"}</div>
             </div>
 
             <div>
-              <div style={{ fontSize: "12px", opacity: 0.75 }}>Service</div>
-              <div style={{ fontWeight: 700 }}>{lead.service_type ?? "—"}</div>
+              <div style={{ fontSize: "11px", color: "#8899aa", textTransform: "uppercase", letterSpacing: "0.05em" }}>Service</div>
+              <div style={{ fontWeight: 600, color: "#f0f4f8", marginTop: "2px" }}>{lead.service_type ?? "—"}</div>
             </div>
 
             <div>
-              <div style={{ fontSize: "12px", opacity: 0.75 }}>Urgency</div>
-              <div style={{ fontWeight: 700 }}>{lead.urgency ?? "—"}</div>
+              <div style={{ fontSize: "11px", color: "#8899aa", textTransform: "uppercase", letterSpacing: "0.05em" }}>Urgency</div>
+              <div style={{ fontWeight: 600, color: "#f0f4f8", marginTop: "2px" }}>{lead.urgency ?? "—"}</div>
             </div>
 
             <div>
-              <div style={{ fontSize: "12px", opacity: 0.75 }}>Qualification</div>
-              <div style={{ fontWeight: 700 }}>{lead.qualification_status ?? "—"}</div>
+              <div style={{ fontSize: "11px", color: "#8899aa", textTransform: "uppercase", letterSpacing: "0.05em" }}>Qualification</div>
+              <div style={{ fontWeight: 600, color: "#f0f4f8", marginTop: "2px" }}>{lead.qualification_status ?? "—"}</div>
             </div>
 
             <div>
-              <div style={{ fontSize: "12px", opacity: 0.75 }}>Status</div>
-              <div style={{ fontWeight: 700 }}>{lead.status ?? "—"}</div>
+              <div style={{ fontSize: "11px", color: "#8899aa", textTransform: "uppercase", letterSpacing: "0.05em" }}>Status</div>
+              <div style={{ fontWeight: 600, color: "#f0f4f8", marginTop: "2px" }}>{lead.status ?? "—"}</div>
             </div>
 
             <div>
-              <div style={{ fontSize: "12px", opacity: 0.75 }}>Created</div>
-              <div style={{ fontWeight: 700 }}>{fmt(lead.created_at)}</div>
+              <div style={{ fontSize: "11px", color: "#8899aa", textTransform: "uppercase", letterSpacing: "0.05em" }}>Created</div>
+              <div style={{ fontWeight: 600, color: "#f0f4f8", marginTop: "2px" }}>{fmt(lead.created_at)}</div>
             </div>
           </div>
         </div>
       )}
 
       <div style={{ marginTop: "16px" }}>
-        <h3 style={{ marginBottom: "8px" }}>Timeline</h3>
+        <h3 style={{ marginBottom: "8px", color: "#f0f4f8" }}>Timeline</h3>
 
         <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
           {messages.map((m) => (
             <li
               key={m.id}
               style={{
-                border: "1px solid var(--color-bg-border)",
+                border: "1px solid #1e2d40",
                 borderRadius: "8px",
-                padding: "10px",
+                padding: "12px",
                 marginBottom: "8px",
+                background: "#111827",
               }}
             >
-              <div style={{ fontSize: "12px", opacity: 0.8 }}>
+              <div style={{ fontSize: "12px", color: "#8899aa" }}>
                 {fmt(m.created_at)} · {m.channel ?? "—"} · {m.direction ?? "—"}
               </div>
-              <div style={{ marginTop: "4px" }}>{m.content ?? ""}</div>
+              <div style={{ marginTop: "4px", color: "#f0f4f8" }}>{m.content ?? ""}</div>
             </li>
           ))}
         </ul>
 
         {messages.length === 0 && (
-          <div style={{ fontSize: "12px", opacity: 0.8 }}>No messages yet.</div>
+          <div style={{ fontSize: "12px", color: "#4a5a6b" }}>No messages yet.</div>
         )}
       </div>
     </div>

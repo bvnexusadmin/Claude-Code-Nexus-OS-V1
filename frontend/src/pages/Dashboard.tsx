@@ -118,10 +118,11 @@ const Card: React.FC<{
 }> = ({ children, style }) => (
   <div
     style={{
-      background: "var(--bg-card)",
-      border: "0.5px solid var(--border-card)",
-      borderRadius: "var(--radius-card)",
-      padding: "16px",
+      background: "#111827",
+      border: "1px solid #1e2d40",
+      borderRadius: "10px",
+      boxShadow: "0 4px 16px rgba(0,0,0,0.4), 0 1px 3px rgba(0,0,0,0.3)",
+      padding: "20px",
       ...style,
     }}
   >
@@ -131,23 +132,18 @@ const Card: React.FC<{
 
 const StatusPill: React.FC<{ status: string }> = ({ status }) => {
   const s = status.toLowerCase();
-  let bg = "var(--color-bg-elevated)";
-  let color = "var(--color-text-secondary)";
+  let bg = "rgba(74, 90, 107, 0.2)";
+  let color = "#8899aa";
   if (s === "booked" || s === "confirmed") {
-    bg = "var(--color-success-bg)";
-    color = "var(--color-success)";
+    bg = "rgba(16, 185, 129, 0.15)"; color = "#10b981";
   } else if (s === "qualifying" || s === "open") {
-    bg = "rgba(99, 102, 241, 0.12)";
-    color = "var(--color-info)";
+    bg = "rgba(99, 102, 241, 0.15)"; color = "#6366f1";
   } else if (s === "new") {
-    bg = "rgba(245, 158, 11, 0.12)";
-    color = "var(--color-warning)";
+    bg = "rgba(14, 165, 233, 0.15)"; color = "#0ea5e9";
   } else if (s === "escalated") {
-    bg = "rgba(239, 68, 68, 0.12)";
-    color = "var(--color-danger)";
+    bg = "rgba(239, 68, 68, 0.15)"; color = "#ef4444";
   } else if (s === "closed") {
-    bg = "var(--color-bg-elevated)";
-    color = "var(--color-text-muted)";
+    bg = "rgba(74, 90, 107, 0.2)"; color = "#4a5a6b";
   }
   return (
     <span
@@ -178,20 +174,20 @@ const MetricCard: React.FC<{
     <div
       style={{
         fontSize: "11px",
-        fontWeight: 500,
-        color: "var(--text-muted)",
+        fontWeight: 600,
+        color: "#8899aa",
         textTransform: "uppercase",
-        letterSpacing: "0.05em",
-        marginBottom: "10px",
+        letterSpacing: "0.06em",
+        marginBottom: "12px",
       }}
     >
       {label}
     </div>
     <div
       style={{
-        fontSize: "28px",
-        fontWeight: 500,
-        color: "var(--text-primary)",
+        fontSize: "36px",
+        fontWeight: 700,
+        color: "#f0f4f8",
         lineHeight: 1,
       }}
     >
@@ -200,8 +196,8 @@ const MetricCard: React.FC<{
           style={{
             display: "inline-block",
             width: "60px",
-            height: "28px",
-            background: "var(--color-bg-elevated)",
+            height: "36px",
+            background: "#1a2235",
             borderRadius: "6px",
           }}
         />
@@ -212,8 +208,8 @@ const MetricCard: React.FC<{
     {sub && !loading && (
       <div
         style={{
-          fontSize: "12px",
-          color: "var(--text-muted)",
+          fontSize: "13px",
+          color: "#8899aa",
           marginTop: "6px",
         }}
       >
@@ -228,11 +224,11 @@ const ActivityIcon: React.FC<{ type: ActivityItem["type"] }> = ({ type }) => {
     ActivityItem["type"],
     { bg: string; color: string; label: string }
   > = {
-    sms: { bg: "var(--color-accent-muted)", color: "var(--color-accent)", label: "SMS" },
-    voice: { bg: "var(--color-success-bg)", color: "var(--color-success)", label: "📞" },
-    email: { bg: "rgba(99, 102, 241, 0.12)", color: "var(--color-info)", label: "@" },
-    booking: { bg: "rgba(245, 158, 11, 0.12)", color: "var(--color-warning)", label: "B" },
-    lead: { bg: "var(--color-success-bg)", color: "var(--color-success)", label: "L" },
+    sms: { bg: "rgba(14, 165, 233, 0.12)", color: "#0ea5e9", label: "SMS" },
+    voice: { bg: "rgba(16, 185, 129, 0.12)", color: "#10b981", label: "📞" },
+    email: { bg: "rgba(99, 102, 241, 0.12)", color: "#6366f1", label: "@" },
+    booking: { bg: "rgba(245, 158, 11, 0.12)", color: "#f59e0b", label: "B" },
+    lead: { bg: "rgba(16, 185, 129, 0.12)", color: "#10b981", label: "L" },
   };
   const cfg = configs[type] ?? configs["sms"];
   return (
@@ -267,12 +263,12 @@ const CHART_OPTIONS = {
   },
   scales: {
     x: {
-      grid: { display: false },
+      grid: { color: "#1a2235", display: true },
       ticks: { color: "#8899aa", font: { size: 11 } },
       border: { display: false },
     },
     y: {
-      grid: { color: "#1e2d40" },
+      grid: { color: "#1a2235" },
       ticks: { color: "#8899aa", font: { size: 11 }, stepSize: 1 },
       border: { display: false },
     },
@@ -415,7 +411,7 @@ const Dashboard: React.FC = () => {
 
   if (!activeClientId) {
     return (
-      <div style={{ padding: "40px 24px", color: "var(--text-muted)" }}>
+      <div style={{ padding: "40px 24px", color: "#4a5a6b" }}>
         No tenant selected.
       </div>
     );
@@ -423,7 +419,7 @@ const Dashboard: React.FC = () => {
 
   if (error) {
     return (
-      <div style={{ padding: "40px 24px", color: "var(--color-danger)" }}>
+      <div style={{ padding: "40px 24px", color: "#ef4444" }}>
         Error loading dashboard: {error}
       </div>
     );
@@ -477,15 +473,8 @@ const Dashboard: React.FC = () => {
     ...CHART_OPTIONS,
     indexAxis: "y" as const,
     scales: {
-      ...CHART_OPTIONS.scales,
-      x: {
-        ...CHART_OPTIONS.scales.x,
-        grid: { color: "#1e2d40" },
-      },
-      y: {
-        ...CHART_OPTIONS.scales.y,
-        grid: { display: false },
-      },
+      x: { grid: { color: "#1a2235" }, ticks: { color: "#8899aa", font: { size: 11 } }, border: { display: false } },
+      y: { grid: { display: false }, ticks: { color: "#8899aa", font: { size: 11 } }, border: { display: false } },
     },
   };
 
@@ -527,9 +516,9 @@ const Dashboard: React.FC = () => {
         <Card style={{ flex: 1, minWidth: 0 }}>
           <div
             style={{
-              fontSize: "13px",
-              fontWeight: 500,
-              color: "var(--text-primary)",
+              fontSize: "15px",
+              fontWeight: 600,
+              color: "#f0f4f8",
               marginBottom: "16px",
             }}
           >
@@ -540,7 +529,7 @@ const Dashboard: React.FC = () => {
               <div
                 style={{
                   height: "100%",
-                  background: "var(--color-bg-elevated)",
+                  background: "#1a2235",
                   borderRadius: "8px",
                 }}
               />
@@ -553,9 +542,9 @@ const Dashboard: React.FC = () => {
         <Card style={{ flex: 1, minWidth: 0 }}>
           <div
             style={{
-              fontSize: "13px",
-              fontWeight: 500,
-              color: "var(--text-primary)",
+              fontSize: "15px",
+              fontWeight: 600,
+              color: "#f0f4f8",
               marginBottom: "16px",
             }}
           >
@@ -566,7 +555,7 @@ const Dashboard: React.FC = () => {
               <div
                 style={{
                   height: "100%",
-                  background: "var(--color-bg-elevated)",
+                  background: "#1a2235",
                   borderRadius: "8px",
                 }}
               />
@@ -583,10 +572,10 @@ const Dashboard: React.FC = () => {
         <Card style={{ flex: 1, minWidth: 0 }}>
           <div
             style={{
-              fontSize: "13px",
-              fontWeight: 500,
-              color: "var(--text-primary)",
-              marginBottom: "14px",
+              fontSize: "15px",
+              fontWeight: 600,
+              color: "#f0f4f8",
+              marginBottom: "16px",
             }}
           >
             Recent leads
@@ -599,14 +588,14 @@ const Dashboard: React.FC = () => {
                   key={i}
                   style={{
                     height: "36px",
-                    background: "var(--color-bg-elevated)",
+                    background: "#1a2235",
                     borderRadius: "6px",
                   }}
                 />
               ))}
             </div>
           ) : data?.recentLeads.length === 0 ? (
-            <div style={{ color: "var(--text-muted)", fontSize: "13px" }}>
+            <div style={{ color: "#4a5a6b", fontSize: "13px" }}>
               No leads yet.
             </div>
           ) : (
@@ -620,7 +609,7 @@ const Dashboard: React.FC = () => {
                     justifyContent: "space-between",
                     padding: "9px 0",
                     borderTop:
-                      i === 0 ? "none" : "0.5px solid var(--border)",
+                      i === 0 ? "none" : "1px solid #1e2d40",
                     gap: "12px",
                   }}
                 >
@@ -629,7 +618,7 @@ const Dashboard: React.FC = () => {
                       style={{
                         fontSize: "13px",
                         fontWeight: 500,
-                        color: "var(--text-primary)",
+                        color: "#f0f4f8",
                         overflow: "hidden",
                         textOverflow: "ellipsis",
                         whiteSpace: "nowrap",
@@ -640,7 +629,7 @@ const Dashboard: React.FC = () => {
                     <div
                       style={{
                         fontSize: "11px",
-                        color: "var(--text-muted)",
+                        color: "#4a5a6b",
                         marginTop: "1px",
                       }}
                     >
@@ -658,10 +647,10 @@ const Dashboard: React.FC = () => {
         <Card style={{ flex: 1, minWidth: 0 }}>
           <div
             style={{
-              fontSize: "13px",
-              fontWeight: 500,
-              color: "var(--text-primary)",
-              marginBottom: "14px",
+              fontSize: "15px",
+              fontWeight: 600,
+              color: "#f0f4f8",
+              marginBottom: "16px",
             }}
           >
             Live activity feed
@@ -674,14 +663,14 @@ const Dashboard: React.FC = () => {
                   key={i}
                   style={{
                     height: "36px",
-                    background: "var(--color-bg-elevated)",
+                    background: "#1a2235",
                     borderRadius: "6px",
                   }}
                 />
               ))}
             </div>
           ) : data?.activityFeed.length === 0 ? (
-            <div style={{ color: "var(--text-muted)", fontSize: "13px" }}>
+            <div style={{ color: "#4a5a6b", fontSize: "13px" }}>
               No recent activity.
             </div>
           ) : (
@@ -695,7 +684,7 @@ const Dashboard: React.FC = () => {
                     gap: "10px",
                     padding: "9px 0",
                     borderTop:
-                      i === 0 ? "none" : "0.5px solid var(--border)",
+                      i === 0 ? "none" : "1px solid #1e2d40",
                   }}
                 >
                   <ActivityIcon type={item.type} />
@@ -703,7 +692,7 @@ const Dashboard: React.FC = () => {
                     <div
                       style={{
                         fontSize: "12.5px",
-                        color: "var(--text-primary)",
+                        color: "#f0f4f8",
                         overflow: "hidden",
                         textOverflow: "ellipsis",
                         whiteSpace: "nowrap",
@@ -714,7 +703,7 @@ const Dashboard: React.FC = () => {
                     <div
                       style={{
                         fontSize: "11px",
-                        color: "var(--text-muted)",
+                        color: "#4a5a6b",
                         marginTop: "2px",
                       }}
                     >

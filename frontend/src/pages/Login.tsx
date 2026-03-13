@@ -34,7 +34,7 @@ const Login: React.FC = () => {
     <div
       style={{
         minHeight: "100vh",
-        background: "var(--color-bg-base)",
+        background: "#0a0e1a",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -47,8 +47,8 @@ const Login: React.FC = () => {
           <div
             style={{
               fontSize: "18px",
-              fontWeight: 500,
-              color: "var(--text-primary)",
+              fontWeight: 700,
+              color: "#f0f4f8",
               letterSpacing: "-0.01em",
             }}
           >
@@ -56,9 +56,9 @@ const Login: React.FC = () => {
           </div>
           <div
             style={{
-              fontSize: "12px",
-              color: "var(--text-muted)",
-              marginTop: "3px",
+              fontSize: "13px",
+              color: "#8899aa",
+              marginTop: "4px",
             }}
           >
             Brautigam Ventures
@@ -68,17 +68,18 @@ const Login: React.FC = () => {
         {/* Card */}
         <div
           style={{
-            background: "var(--bg-card)",
-            border: "0.5px solid var(--border-card)",
-            borderRadius: "var(--radius-card)",
-            padding: "28px",
+            background: "#111827",
+            border: "1px solid #1e2d40",
+            borderRadius: "12px",
+            padding: "32px",
+            boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
           }}
         >
           <h2
             style={{
               fontSize: "15px",
-              fontWeight: 500,
-              color: "var(--text-primary)",
+              fontWeight: 600,
+              color: "#f0f4f8",
               marginBottom: "20px",
             }}
           >
@@ -92,7 +93,7 @@ const Login: React.FC = () => {
                   display: "block",
                   fontSize: "12px",
                   fontWeight: 500,
-                  color: "var(--text-secondary)",
+                  color: "#8899aa",
                   marginBottom: "5px",
                 }}
               >
@@ -106,17 +107,17 @@ const Login: React.FC = () => {
                 placeholder="you@example.com"
                 style={{
                   width: "100%",
-                  padding: "8px 10px",
+                  padding: "10px 12px",
                   fontSize: "13.5px",
-                  color: "var(--text-primary)",
-                  background: "var(--color-bg-surface)",
-                  border: "0.5px solid var(--border)",
+                  color: "#f0f4f8",
+                  background: "#1a2235",
+                  border: "1px solid #1e2d40",
                   borderRadius: "7px",
                   outline: "none",
-                  boxSizing: "border-box",
+                  boxSizing: "border-box" as const,
                 }}
-                onFocus={(e) => (e.target.style.borderColor = "var(--accent)")}
-                onBlur={(e) => (e.target.style.borderColor = "var(--border)")}
+                onFocus={(e) => (e.target.style.borderColor = "#0ea5e9")}
+                onBlur={(e) => (e.target.style.borderColor = "#1e2d40")}
               />
             </div>
 
@@ -126,7 +127,7 @@ const Login: React.FC = () => {
                   display: "block",
                   fontSize: "12px",
                   fontWeight: 500,
-                  color: "var(--text-secondary)",
+                  color: "#8899aa",
                   marginBottom: "5px",
                 }}
               >
@@ -140,17 +141,17 @@ const Login: React.FC = () => {
                 placeholder="••••••••"
                 style={{
                   width: "100%",
-                  padding: "8px 10px",
+                  padding: "10px 12px",
                   fontSize: "13.5px",
-                  color: "var(--text-primary)",
-                  background: "var(--color-bg-surface)",
-                  border: "0.5px solid var(--border)",
+                  color: "#f0f4f8",
+                  background: "#1a2235",
+                  border: "1px solid #1e2d40",
                   borderRadius: "7px",
                   outline: "none",
-                  boxSizing: "border-box",
+                  boxSizing: "border-box" as const,
                 }}
-                onFocus={(e) => (e.target.style.borderColor = "var(--accent)")}
-                onBlur={(e) => (e.target.style.borderColor = "var(--border)")}
+                onFocus={(e) => (e.target.style.borderColor = "#0ea5e9")}
+                onBlur={(e) => (e.target.style.borderColor = "#1e2d40")}
               />
             </div>
 
@@ -158,11 +159,11 @@ const Login: React.FC = () => {
               <div
                 style={{
                   fontSize: "12.5px",
-                  color: "var(--color-danger)",
-                  background: "rgba(239, 68, 68, 0.1)",
-                  border: "0.5px solid rgba(239, 68, 68, 0.3)",
+                  color: "#ef4444",
+                  background: "rgba(239,68,68,0.1)",
+                  border: "1px solid rgba(239,68,68,0.3)",
                   borderRadius: "7px",
-                  padding: "8px 12px",
+                  padding: "10px 14px",
                 }}
               >
                 {error}
@@ -173,13 +174,13 @@ const Login: React.FC = () => {
               type="submit"
               disabled={loading}
               style={{
-                marginTop: "4px",
+                marginTop: "6px",
                 width: "100%",
-                padding: "9px",
-                fontSize: "13.5px",
-                fontWeight: 500,
-                color: "var(--color-text-primary)",
-                background: loading ? "rgba(14, 165, 233, 0.5)" : "var(--color-accent)",
+                padding: "10px",
+                fontSize: "14px",
+                fontWeight: 600,
+                color: "#0a0e1a",
+                background: loading ? "rgba(14,165,233,0.5)" : "#0ea5e9",
                 border: "none",
                 borderRadius: "7px",
                 cursor: loading ? "not-allowed" : "pointer",
