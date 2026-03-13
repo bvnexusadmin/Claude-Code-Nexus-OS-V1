@@ -44,6 +44,7 @@ router.post("/send-message", async (req, res) => {
         channel: "sms",
         sender_type: "system",
         event: "message.sent",
+        topic: "conversation",
         content,
       })
       .select("id")

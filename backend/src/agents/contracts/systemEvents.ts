@@ -15,6 +15,7 @@ export const SYSTEM_EVENTS = {
   FOLLOWUP_REQUESTED: "followup.requested",
 
   HANDOFF_REQUIRED: "handoff.required",
+  BOOKING_CONFIRMED: "booking.confirmed",
 } as const;
 
 export type SystemEventType =

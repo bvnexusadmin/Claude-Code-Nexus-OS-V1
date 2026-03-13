@@ -296,6 +296,8 @@ router.post(
               trace_id: callId,
               event_type: "message.received",
               client_id,
+              source: "call",
+              occurred_at: new Date().toISOString(),
               payload: { channel: "voice", text, toNumber, fromNumber },
             });
           } catch (err) {

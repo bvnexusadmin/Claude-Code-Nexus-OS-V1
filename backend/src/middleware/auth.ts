@@ -38,7 +38,7 @@ function getBearerToken(authHeader: string | undefined): string | null {
  * - This is the foundation for BV admin tenant switching later.
  */
 export const loadUser = async (
-  req: Request & { user?: AuthUser },
+  req: Request,
   res: Response,
   next: NextFunction
 ) => {
@@ -103,9 +103,9 @@ export const loadUser = async (
       return res.status(403).json({ error: "Unable to resolve active client" });
     }
 
-    req.user = {
+    (req as any).user = {
       id: userId,
-      email,
+      ...(email !== undefined ? { email } : {}),
       client_id: active.client_id,
       role: active.role,
       token,

@@ -3,7 +3,7 @@
 // This is the ONLY place where bookingAgent decisions
 // turn into real bookings + calendar events.
 
-import { bookingService } from "../booking/bookingService";
+import { bookingService } from "../booking/bookingService.js";
 
 export async function executeBookingIntent(result: any) {
   if (!result?.intent) return;

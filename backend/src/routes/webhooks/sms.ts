@@ -108,7 +108,7 @@ router.post(
           type: "sms.inbound",
           channel: "sms",
           occurred_at: new Date().toISOString(),
-          raw: req.body,
+          payload: req.body,
         },
         lead: {
           id: lead_id,

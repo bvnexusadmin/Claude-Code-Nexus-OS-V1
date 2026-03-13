@@ -86,6 +86,8 @@ router.post("/booking/confirm/send", async (req, res) => {
       trace_id: `booking-${booking_id}`,
       event_type: "booking.confirmed",
       client_id,
+      source: "system",
+      occurred_at: new Date().toISOString(),
       payload: {
         booking_id,
         lead_id: booking.lead_id,

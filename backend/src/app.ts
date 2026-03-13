@@ -14,7 +14,7 @@ import followUpTestRoutes from "./routes/internal/followUpTest.js";
 import conversationTestRoutes from "./routes/internal/conversationTest.js";
 import conversationRoutes from "./routes/internal/conversation.js";
 import emailRoutes from "./routes/internal/email.js";
-import meRoutes from "./routes/internal/me"; // ✅ ADD (tsx import: no .js)
+import meRoutes from "./routes/internal/me.js";
 
 /* =====================
    AUTH (EMAIL/PASSWORD ONLY)

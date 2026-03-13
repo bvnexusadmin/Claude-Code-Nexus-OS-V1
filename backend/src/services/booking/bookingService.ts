@@ -1,6 +1,6 @@
-import { supabaseAdmin } from "../../utils/supabaseAdmin";
-import { calendarService } from "../calendar/calendarService";
-import { eventBus } from "../events/eventBus";
+import { supabaseAdmin } from "../../utils/supabaseAdmin.js";
+import { calendarService } from "../calendar/calendarService.js";
+import { eventBus } from "../events/eventBus.js";
 
 type CreateBookingInput = {
   client_id: string;

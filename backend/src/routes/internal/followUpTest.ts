@@ -15,7 +15,7 @@ router.post("/test-follow-up", async (_req, res) => {
         type: "system.follow_up_check",
         channel: "system",
         occurred_at: new Date().toISOString(),
-        raw: {
+        payload: {
           last_outbound_at: "2025-01-01T00:00:00Z", // force stale
         },
       },

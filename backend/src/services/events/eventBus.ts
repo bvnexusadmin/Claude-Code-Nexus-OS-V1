@@ -1,10 +1,11 @@
+import { EventEmitter } from "events";
 import type { SystemEvent } from "../../agents/contracts/systemEvents.js";
 import { dispatchEvent } from "../agents/agentDispatcher.js";
 
 /**
  * Central Event Bus
  */
-class EventBus {
+class EventBus extends EventEmitter {
   async emitEvent(event: SystemEvent): Promise<void> {
     if (!event.event_id) throw new Error("Event missing event_id");
     if (!event.trace_id) throw new Error("Event missing trace_id");

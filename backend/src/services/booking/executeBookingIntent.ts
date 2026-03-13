@@ -1,4 +1,4 @@
-import { bookingService } from "./bookingService";
+import { bookingService } from "./bookingService.js";
 
 type ExecuteBookingIntentInput = {
   client_id: string;

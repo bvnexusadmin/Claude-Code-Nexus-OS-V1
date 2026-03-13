@@ -1,8 +1,10 @@
 import postmark from "postmark";
 
-const postmarkClient = new postmark.ServerClient(
-  process.env.POSTMARK_API_TOKEN as string
-);
+const token = process.env.POSTMARK_API_TOKEN;
+if (!token) {
+  throw new Error("Missing POSTMARK_API_TOKEN in environment");
+}
+const postmarkClient = new postmark.ServerClient(token);
 
 export async function sendEmail(params: {
   to: string;

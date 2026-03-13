@@ -264,7 +264,7 @@ export async function bookingAgent(
     },
     next_message: formatSlotsMessage(slots),
     reasons,
-    errors: errors.length ? errors : undefined,
+    ...(errors.length ? { errors } : {}),
   };
 }
 
@@ -438,8 +438,10 @@ function setLocalTimeFromDateISO(
   timeZone: string,
   hhmm: string
 ): Date {
-  const [y, m, d] = dateISO.split("-").map(Number);
-  const [hh, mm] = hhmm.split(":").map(Number);
+  const _dp = dateISO.split("-").map(Number);
+  const _tp = hhmm.split(":").map(Number);
+  const y = _dp[0]!; const m = _dp[1]!; const d = _dp[2]!;
+  const hh = _tp[0]!; const mm = _tp[1]!;
 
   const utcGuess = new Date(Date.UTC(y, m - 1, d, hh, mm));
 
@@ -453,9 +455,12 @@ function setLocalTimeFromDateISO(
     minute: "2-digit",
   }).format(utcGuess);
 
-  const [dp, tp] = localStr.split(", ");
-  const [yy, mm2, dd] = dp.split("-").map(Number);
-  const [HH, MM] = tp.split(":").map(Number);
+  const _localParts = localStr.split(", ");
+  const dp = _localParts[0]!; const tp = _localParts[1]!;
+  const _yp = dp.split("-").map(Number);
+  const _hp = tp.split(":").map(Number);
+  const yy = _yp[0]!; const mm2 = _yp[1]!; const dd = _yp[2]!;
+  const HH = _hp[0]!; const MM = _hp[1]!;
 
   return new Date(Date.UTC(yy, mm2 - 1, dd, HH, MM));
 }

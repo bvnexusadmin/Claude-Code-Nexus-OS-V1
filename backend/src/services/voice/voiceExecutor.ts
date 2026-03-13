@@ -27,8 +27,12 @@ export async function executeVoiceMessage(args: {
 
   const assistantId = data.vapi_assistant_id;
 
+  if (!process.env.VAPI_API_KEY) {
+    throw new Error("Missing VAPI_API_KEY in environment");
+  }
+
   // Call Vapi to speak the text
-  await fetch(`https://api.vapi.ai/calls/${call_id}/say`, {
+  const resp = await fetch(`https://api.vapi.ai/calls/${call_id}/say`, {
     method: "POST",
     headers: {
       "Authorization": `Bearer ${process.env.VAPI_API_KEY}`,
@@ -39,4 +43,8 @@ export async function executeVoiceMessage(args: {
       text,
     }),
   });
+
+  if (!resp.ok) {
+    throw new Error(`Vapi say failed: ${resp.status} ${resp.statusText}`);
+  }
 }

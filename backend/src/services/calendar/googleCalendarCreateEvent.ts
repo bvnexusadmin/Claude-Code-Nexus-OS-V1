@@ -78,11 +78,11 @@ export async function createGoogleCalendarEvent(
   const res = await calendar.events.insert({
     calendarId,
     requestBody,
-    conferenceDataVersion,
+    ...(conferenceDataVersion !== undefined ? { conferenceDataVersion } : {}),
     sendUpdates: "all",
   });
 
-  const ev = res.data;
+  const ev = (res as any).data ?? res;
 
   if (!ev?.id) {
     throw new Error("Google Calendar event creation failed: missing event id");

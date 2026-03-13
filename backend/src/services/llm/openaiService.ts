@@ -7,4 +7,4 @@ if (!apiKey) {
 
 export const openai = new OpenAI({ apiKey });
 
-export const OPENAI_MODEL = process.env.OPENAI_MODEL || "gpt-5.2";
+export const OPENAI_MODEL = process.env.OPENAI_MODEL || "gpt-4o";

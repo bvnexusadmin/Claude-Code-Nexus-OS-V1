@@ -129,12 +129,12 @@ QUESTION:
 """${question}"""
 `.trim();
 
-    const resp = await openai.responses.create({
+    const resp = await openai.chat.completions.create({
       model: OPENAI_MODEL,
-      input: prompt,
+      messages: [{ role: "user", content: prompt }],
     });
 
-    const raw = (resp as any)?.output_text ?? "";
+    const raw = resp.choices[0]?.message?.content ?? "";
 
     let parsed: unknown;
     try {
