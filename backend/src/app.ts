@@ -47,6 +47,8 @@ app.use(
   cors({
     origin: "http://localhost:3000",
     credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization", "x-nexus-client-id"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   })
 );
 

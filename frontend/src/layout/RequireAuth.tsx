@@ -8,7 +8,21 @@ const RequireAuth: React.FC<{ children: React.ReactElement }> = ({
   const { session, loading } = useSession();
 
   if (loading) {
-    return <div>Loading session…</div>;
+    return (
+      <div
+        style={{
+          minHeight: "100vh",
+          background: "var(--bg-page)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: "13px",
+          color: "var(--text-muted)",
+        }}
+      >
+        Loading…
+      </div>
+    );
   }
 
   if (!session) {

@@ -1,9 +1,9 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { MeResponse, TenantProvider } from "../lib/tenant";
 
-const API_BASE = "http://localhost:4000";
+const API_BASE = "";
 const TENANT_STORAGE_KEY = "nexus_active_client_id";
 
 async function safeReadJson(
@@ -18,14 +18,80 @@ async function safeReadJson(
   }
 }
 
+// ── Icons ───────────────────────────────────────────────────────────────────
+
+const Icon: React.FC<{ d: string; size?: number }> = ({ d, size = 16 }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 16 16"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.4"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    style={{ flexShrink: 0 }}
+  >
+    <path d={d} />
+  </svg>
+);
+
+const Icons = {
+  dashboard: "M2 2h5v5H2zM9 2h5v5H9zM2 9h5v5H2zM9 9h5v5H9z",
+  inbox:
+    "M2 4h12v8H2V4zm0 0l6 4 6-4",
+  leads:
+    "M6 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm4-2a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM2 14c0-2.5 1.8-4 4-4h4c2.2 0 4 1.5 4 4",
+  bookings:
+    "M3 3h10a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zM6 1v4M10 1v4M2 7h12",
+  conversations:
+    "M2 2h12v8H8.5L5 13v-3H2V2z",
+  analytics:
+    "M2 12h3V8H2zM6.5 12h3V5h-3zM11 12h3V2h-3z",
+  settings:
+    "M8 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm4.7-2a4.7 4.7 0 0 0 0-1l1.3-1-1-1.7-1.5.5a5 5 0 0 0-.9-.5L10.3 3h-2l-.3 1.3a5 5 0 0 0-.9.5L5.6 4.3 4.7 6l1.3 1a4.7 4.7 0 0 0 0 1L4.7 9l1 1.7 1.5-.5c.3.2.6.4.9.5L8.3 12h2l.3-1.3c.3-.1.6-.3.9-.5l1.5.5 1-1.7-1.3-1z",
+};
+
+const NAV_ITEMS = [
+  { to: "/dashboard", label: "Dashboard", icon: Icons.dashboard, end: true },
+  { to: "/inbox", label: "Inbox", icon: Icons.inbox, end: true },
+  { to: "/leads", label: "Leads", icon: Icons.leads, end: true },
+  { to: "/bookings", label: "Bookings", icon: Icons.bookings, end: true },
+  { to: "/conversations", label: "Conversations", icon: Icons.conversations, end: true },
+  { to: "/analytics", label: "Analytics", icon: Icons.analytics, end: true },
+  { to: "/settings", label: "Settings", icon: Icons.settings, end: true },
+];
+
+const PAGE_TITLES: Record<string, string> = {
+  "/dashboard": "Dashboard",
+  "/inbox": "Inbox",
+  "/leads": "Leads",
+  "/bookings": "Bookings",
+  "/conversations": "Conversations",
+  "/analytics": "Analytics",
+  "/settings": "Settings",
+  "/admin": "Admin",
+};
+
+function getPageTitle(pathname: string): string {
+  // exact match
+  if (PAGE_TITLES[pathname]) return PAGE_TITLES[pathname];
+  // prefix match for nested routes
+  const prefix = Object.keys(PAGE_TITLES).find(
+    (k) => k !== "/" && pathname.startsWith(k + "/")
+  );
+  return prefix ? PAGE_TITLES[prefix] : "Nexus OS";
+}
+
+// ── Component ────────────────────────────────────────────────────────────────
+
 const AppLayout: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [me, setMe] = useState<MeResponse | null>(null);
   const [loadingMe, setLoadingMe] = useState(true);
   const [meError, setMeError] = useState<string | null>(null);
-
-  // Persist tenant across reloads
   const [activeClientOverride, setActiveClientOverride] = useState<string | null>(
     () => {
       try {
@@ -37,30 +103,23 @@ const AppLayout: React.FC = () => {
   );
 
   const memberships = useMemo(() => me?.memberships ?? [], [me]);
-
   const activeClientId = me?.active?.client_id ?? null;
   const activeRole = me?.active?.role ?? null;
 
   const fetchMe = async (clientIdOverride: string | null) => {
     setLoadingMe(true);
     setMeError(null);
-
     try {
       const {
         data: { session },
       } = await supabase.auth.getSession();
 
-      if (!session?.access_token) {
-        throw new Error("Not authenticated");
-      }
+      if (!session?.access_token) throw new Error("Not authenticated");
 
       const headers: Record<string, string> = {
         Authorization: `Bearer ${session.access_token}`,
       };
-
-      if (clientIdOverride) {
-        headers["x-nexus-client-id"] = clientIdOverride;
-      }
+      if (clientIdOverride) headers["x-nexus-client-id"] = clientIdOverride;
 
       const res = await fetch(`${API_BASE}/internal/me`, { headers });
       const { json, text } = await safeReadJson(res);
@@ -69,20 +128,15 @@ const AppLayout: React.FC = () => {
         const bodyPreview = (text ?? "").slice(0, 300);
         throw new Error(`HTTP ${res.status} ${res.statusText} — ${bodyPreview}`);
       }
-
       if (!json) {
         const bodyPreview = (text ?? "").slice(0, 300);
         throw new Error(`Non-JSON response from /internal/me — ${bodyPreview}`);
       }
-
-      if (!json.ok) {
-        throw new Error(json.error || "Failed to load /internal/me");
-      }
+      if (!json.ok) throw new Error(json.error || "Failed to load /internal/me");
 
       const typed = json as MeResponse;
       setMe(typed);
 
-      // Clear invalid persisted tenant
       if (
         clientIdOverride &&
         !typed.memberships.some((m) => m.client_id === clientIdOverride)
@@ -119,7 +173,10 @@ const AppLayout: React.FC = () => {
     } catch {}
   };
 
-  const showAdminNav = activeRole === "bv_admin";
+  const pageTitle = getPageTitle(location.pathname);
+  const userEmail = me?.user?.email ?? "";
+  const userInitial = userEmail ? userEmail.charAt(0).toUpperCase() : "U";
+  const clientName = me?.active?.client?.name ?? (loadingMe ? "…" : "—");
 
   return (
     <TenantProvider
@@ -134,100 +191,278 @@ const AppLayout: React.FC = () => {
         refreshMe,
       }}
     >
-      <div style={{ display: "flex", height: "100vh" }}>
+      <div style={{ display: "flex", height: "100vh", overflow: "hidden" }}>
+
+        {/* ── Sidebar ─────────────────────────────────────────────────── */}
         <aside
           style={{
-            width: "260px",
-            borderRight: "1px solid #e5e7eb",
-            padding: "16px",
+            width: "220px",
+            flexShrink: 0,
+            background: "var(--bg-sidebar)",
+            borderRight: "0.5px solid var(--border)",
             display: "flex",
             flexDirection: "column",
-            gap: "12px",
+            height: "100vh",
+            position: "fixed",
+            top: 0,
+            left: 0,
+            zIndex: 20,
+            overflow: "hidden",
           }}
         >
-          <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-            <h3 style={{ margin: 0 }}>Nexus OS</h3>
+          {/* Logo */}
+          <div style={{ padding: "20px 20px 18px" }}>
+            <div
+              style={{
+                fontSize: "15px",
+                fontWeight: 500,
+                color: "var(--text-primary)",
+                letterSpacing: "-0.01em",
+              }}
+            >
+              Nexus OS
+            </div>
+            <div
+              style={{
+                fontSize: "11px",
+                color: "var(--text-muted)",
+                marginTop: "2px",
+              }}
+            >
+              Brautigam Ventures
+            </div>
+          </div>
 
+          <div
+            style={{
+              height: "0.5px",
+              background: "var(--border)",
+              margin: "0",
+            }}
+          />
+
+          {/* Navigation */}
+          <nav
+            style={{
+              flex: 1,
+              padding: "10px 0",
+              display: "flex",
+              flexDirection: "column",
+              overflow: "hidden",
+            }}
+          >
+            {NAV_ITEMS.map((item) => (
+              <NavLink
+                key={item.label}
+                to={item.to}
+                end={item.end}
+                style={({ isActive }) => ({
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px",
+                  padding: "9px 20px",
+                  fontSize: "13.5px",
+                  fontWeight: 400,
+                  color: isActive ? "var(--accent)" : "var(--text-secondary)",
+                  background: isActive ? "var(--accent-light)" : "transparent",
+                  borderRight: isActive
+                    ? "3px solid var(--accent)"
+                    : "3px solid transparent",
+                  cursor: "pointer",
+                  transition: "background 0.1s, color 0.1s",
+                })}
+              >
+                <Icon d={item.icon} size={15} />
+                {item.label}
+              </NavLink>
+            ))}
+          </nav>
+
+          <div
+            style={{
+              height: "0.5px",
+              background: "var(--border)",
+            }}
+          />
+
+          {/* Client / User info */}
+          <div style={{ padding: "14px 20px" }}>
             {loadingMe ? (
-              <div style={{ fontSize: "12px", opacity: 0.8 }}>Loading…</div>
+              <div style={{ fontSize: "12px", color: "var(--text-muted)" }}>
+                Loading…
+              </div>
             ) : meError ? (
               <div
                 style={{
-                  fontSize: "12px",
-                  color: "crimson",
+                  fontSize: "11px",
+                  color: "#ef4444",
                   whiteSpace: "pre-wrap",
                 }}
               >
-                Identity error: {meError}
+                {meError}
               </div>
             ) : (
-              <div style={{ fontSize: "12px", opacity: 0.9 }}>
-                <div>
-                  <strong>Client:</strong> {me?.active?.client?.name}
-                </div>
-                <div>
-                  <strong>Role:</strong> {me?.active?.role}
-                </div>
-              </div>
-            )}
-
-            {!loadingMe && !meError && memberships.length > 1 && (
-              <div style={{ marginTop: "8px" }}>
-                <label
+              <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+                <div
                   style={{
                     fontSize: "12px",
-                    display: "block",
-                    marginBottom: "4px",
+                    fontWeight: 500,
+                    color: "var(--text-primary)",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
                   }}
                 >
-                  Switch tenant
-                </label>
-                <select
-                  value={me?.active?.client_id ?? ""}
-                  onChange={(e) => switchTenant(e.target.value)}
-                  style={{ width: "100%", padding: "6px" }}
-                >
-                  {memberships.map((m) => (
-                    <option key={m.client_id} value={m.client_id}>
-                      {m.client?.name ?? m.client_id} ({m.role})
-                    </option>
-                  ))}
-                </select>
+                  {clientName}
+                </div>
+                <div style={{ fontSize: "11px", color: "var(--text-muted)" }}>
+                  {activeRole ?? "—"}
+                </div>
               </div>
             )}
+
+            {/* Tenant switcher */}
+            {!loadingMe && !meError && memberships.length > 1 && (
+              <select
+                value={me?.active?.client_id ?? ""}
+                onChange={(e) => switchTenant(e.target.value)}
+                style={{
+                  marginTop: "8px",
+                  width: "100%",
+                  padding: "5px 8px",
+                  fontSize: "11px",
+                  border: "0.5px solid var(--border)",
+                  borderRadius: "6px",
+                  background: "var(--bg-page)",
+                  color: "var(--text-secondary)",
+                  cursor: "pointer",
+                }}
+              >
+                {memberships.map((m) => (
+                  <option key={m.client_id} value={m.client_id}>
+                    {m.client?.name ?? m.client_id} ({m.role})
+                  </option>
+                ))}
+              </select>
+            )}
+
+            <button
+              onClick={handleLogout}
+              style={{
+                marginTop: "10px",
+                width: "100%",
+                padding: "7px 12px",
+                fontSize: "12px",
+                fontWeight: 400,
+                color: "var(--text-secondary)",
+                background: "transparent",
+                border: "0.5px solid var(--border)",
+                borderRadius: "6px",
+                cursor: "pointer",
+                textAlign: "left",
+              }}
+            >
+              Sign out
+            </button>
           </div>
-
-          <nav
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "8px",
-              flex: 1,
-            }}
-          >
-            <NavLink to="/dashboard">Dashboard</NavLink>
-            <NavLink to="/inbox">Inbox</NavLink>
-            <NavLink to="/bookings">Bookings</NavLink>
-            <NavLink to="/leads">Leads</NavLink>
-            <NavLink to="/settings">Settings</NavLink>
-            {showAdminNav && <NavLink to="/admin">Admin</NavLink>}
-          </nav>
-
-          <button
-            onClick={handleLogout}
-            style={{
-              marginTop: "16px",
-              padding: "8px",
-              cursor: "pointer",
-            }}
-          >
-            Log Out
-          </button>
         </aside>
 
-        <main style={{ flex: 1, padding: "24px" }}>
-          <Outlet />
-        </main>
+        {/* ── Main area ───────────────────────────────────────────────── */}
+        <div
+          style={{
+            marginLeft: "220px",
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            height: "100vh",
+            overflow: "hidden",
+          }}
+        >
+          {/* Top bar */}
+          <header
+            style={{
+              height: "52px",
+              flexShrink: 0,
+              background: "var(--bg-card)",
+              borderBottom: "0.5px solid var(--border)",
+              padding: "0 24px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <h1
+              style={{
+                fontSize: "15px",
+                fontWeight: 500,
+                color: "var(--text-primary)",
+              }}
+            >
+              {pageTitle}
+            </h1>
+
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              {/* System status */}
+              <span
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "5px",
+                  background: "#f0fdf4",
+                  color: "#15803d",
+                  fontSize: "11px",
+                  fontWeight: 500,
+                  padding: "4px 10px",
+                  borderRadius: "999px",
+                  border: "0.5px solid #bbf7d0",
+                }}
+              >
+                <span
+                  style={{
+                    width: "6px",
+                    height: "6px",
+                    borderRadius: "50%",
+                    background: "#22c55e",
+                    display: "inline-block",
+                  }}
+                />
+                Online
+              </span>
+
+              {/* Avatar */}
+              <div
+                title={userEmail}
+                style={{
+                  width: "30px",
+                  height: "30px",
+                  borderRadius: "50%",
+                  background: "var(--accent)",
+                  color: "white",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "12px",
+                  fontWeight: 500,
+                  flexShrink: 0,
+                  cursor: "default",
+                }}
+              >
+                {userInitial}
+              </div>
+            </div>
+          </header>
+
+          {/* Page content */}
+          <main
+            style={{
+              flex: 1,
+              overflow: "auto",
+              background: "var(--bg-page)",
+            }}
+          >
+            <Outlet />
+          </main>
+        </div>
       </div>
     </TenantProvider>
   );

@@ -1,6 +1,6 @@
 import { supabase } from "./supabase";
 
-const API_BASE = "http://localhost:4000";
+const API_BASE = "";
 const TENANT_STORAGE_KEY = "nexus_active_client_id";
 
 async function getAuthHeaders(): Promise<Record<string, string>> {
