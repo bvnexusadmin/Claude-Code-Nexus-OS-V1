@@ -437,7 +437,7 @@ const AppLayout: React.FC = () => {
                   height: "30px",
                   borderRadius: "50%",
                   background: "var(--accent)",
-                  color: "white",
+                  color: "var(--color-text-primary)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",

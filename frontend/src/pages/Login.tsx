@@ -34,7 +34,7 @@ const Login: React.FC = () => {
     <div
       style={{
         minHeight: "100vh",
-        background: "#f5f6fa",
+        background: "var(--color-bg-base)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -109,7 +109,7 @@ const Login: React.FC = () => {
                   padding: "8px 10px",
                   fontSize: "13.5px",
                   color: "var(--text-primary)",
-                  background: "#f5f6fa",
+                  background: "var(--color-bg-surface)",
                   border: "0.5px solid var(--border)",
                   borderRadius: "7px",
                   outline: "none",
@@ -143,7 +143,7 @@ const Login: React.FC = () => {
                   padding: "8px 10px",
                   fontSize: "13.5px",
                   color: "var(--text-primary)",
-                  background: "#f5f6fa",
+                  background: "var(--color-bg-surface)",
                   border: "0.5px solid var(--border)",
                   borderRadius: "7px",
                   outline: "none",
@@ -158,9 +158,9 @@ const Login: React.FC = () => {
               <div
                 style={{
                   fontSize: "12.5px",
-                  color: "#b91c1c",
-                  background: "#fef2f2",
-                  border: "0.5px solid #fecaca",
+                  color: "var(--color-danger)",
+                  background: "rgba(239, 68, 68, 0.1)",
+                  border: "0.5px solid rgba(239, 68, 68, 0.3)",
                   borderRadius: "7px",
                   padding: "8px 12px",
                 }}
@@ -178,8 +178,8 @@ const Login: React.FC = () => {
                 padding: "9px",
                 fontSize: "13.5px",
                 fontWeight: 500,
-                color: "white",
-                background: loading ? "#93c5fd" : "#2563eb",
+                color: "var(--color-text-primary)",
+                background: loading ? "rgba(14, 165, 233, 0.5)" : "var(--color-accent)",
                 border: "none",
                 borderRadius: "7px",
                 cursor: loading ? "not-allowed" : "pointer",

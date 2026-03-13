@@ -131,23 +131,23 @@ const Card: React.FC<{
 
 const StatusPill: React.FC<{ status: string }> = ({ status }) => {
   const s = status.toLowerCase();
-  let bg = "#f3f4f6";
-  let color = "#6b7280";
+  let bg = "var(--color-bg-elevated)";
+  let color = "var(--color-text-secondary)";
   if (s === "booked" || s === "confirmed") {
-    bg = "#f0fdf4";
-    color = "#15803d";
+    bg = "var(--color-success-bg)";
+    color = "var(--color-success)";
   } else if (s === "qualifying" || s === "open") {
-    bg = "#eff6ff";
-    color = "#1d4ed8";
+    bg = "rgba(99, 102, 241, 0.12)";
+    color = "var(--color-info)";
   } else if (s === "new") {
-    bg = "#fffbeb";
-    color = "#b45309";
+    bg = "rgba(245, 158, 11, 0.12)";
+    color = "var(--color-warning)";
   } else if (s === "escalated") {
-    bg = "#fef2f2";
-    color = "#b91c1c";
+    bg = "rgba(239, 68, 68, 0.12)";
+    color = "var(--color-danger)";
   } else if (s === "closed") {
-    bg = "#f3f4f6";
-    color = "#6b7280";
+    bg = "var(--color-bg-elevated)";
+    color = "var(--color-text-muted)";
   }
   return (
     <span
@@ -201,7 +201,7 @@ const MetricCard: React.FC<{
             display: "inline-block",
             width: "60px",
             height: "28px",
-            background: "#f3f4f6",
+            background: "var(--color-bg-elevated)",
             borderRadius: "6px",
           }}
         />
@@ -228,11 +228,11 @@ const ActivityIcon: React.FC<{ type: ActivityItem["type"] }> = ({ type }) => {
     ActivityItem["type"],
     { bg: string; color: string; label: string }
   > = {
-    sms: { bg: "#eff6ff", color: "#3b82f6", label: "SMS" },
-    voice: { bg: "#f0fdf4", color: "#22c55e", label: "📞" },
-    email: { bg: "#fdf4ff", color: "#a855f7", label: "@" },
-    booking: { bg: "#fff7ed", color: "#f97316", label: "B" },
-    lead: { bg: "#f0fdf4", color: "#16a34a", label: "L" },
+    sms: { bg: "var(--color-accent-muted)", color: "var(--color-accent)", label: "SMS" },
+    voice: { bg: "var(--color-success-bg)", color: "var(--color-success)", label: "📞" },
+    email: { bg: "rgba(99, 102, 241, 0.12)", color: "var(--color-info)", label: "@" },
+    booking: { bg: "rgba(245, 158, 11, 0.12)", color: "var(--color-warning)", label: "B" },
+    lead: { bg: "var(--color-success-bg)", color: "var(--color-success)", label: "L" },
   };
   const cfg = configs[type] ?? configs["sms"];
   return (
@@ -268,12 +268,12 @@ const CHART_OPTIONS = {
   scales: {
     x: {
       grid: { display: false },
-      ticks: { color: "#9ca3af", font: { size: 11 } },
+      ticks: { color: "#8899aa", font: { size: 11 } },
       border: { display: false },
     },
     y: {
-      grid: { color: "#f3f4f6" },
-      ticks: { color: "#9ca3af", font: { size: 11 }, stepSize: 1 },
+      grid: { color: "#1e2d40" },
+      ticks: { color: "#8899aa", font: { size: 11 }, stepSize: 1 },
       border: { display: false },
     },
   },
@@ -423,7 +423,7 @@ const Dashboard: React.FC = () => {
 
   if (error) {
     return (
-      <div style={{ padding: "40px 24px", color: "#ef4444" }}>
+      <div style={{ padding: "40px 24px", color: "var(--color-danger)" }}>
         Error loading dashboard: {error}
       </div>
     );
@@ -454,7 +454,7 @@ const Dashboard: React.FC = () => {
     datasets: [
       {
         data: channelValues,
-        backgroundColor: ["#3b82f6", "#22c55e", "#a855f7"],
+        backgroundColor: ["#0ea5e9", "#10b981", "#6366f1"],
         borderRadius: 6,
         borderSkipped: false,
       },
@@ -466,7 +466,7 @@ const Dashboard: React.FC = () => {
     datasets: [
       {
         data: weekValues,
-        backgroundColor: "#3b82f6",
+        backgroundColor: "#0ea5e9",
         borderRadius: 6,
         borderSkipped: false,
       },
@@ -480,7 +480,7 @@ const Dashboard: React.FC = () => {
       ...CHART_OPTIONS.scales,
       x: {
         ...CHART_OPTIONS.scales.x,
-        grid: { color: "#f3f4f6" },
+        grid: { color: "#1e2d40" },
       },
       y: {
         ...CHART_OPTIONS.scales.y,
@@ -540,7 +540,7 @@ const Dashboard: React.FC = () => {
               <div
                 style={{
                   height: "100%",
-                  background: "#f9fafb",
+                  background: "var(--color-bg-elevated)",
                   borderRadius: "8px",
                 }}
               />
@@ -566,7 +566,7 @@ const Dashboard: React.FC = () => {
               <div
                 style={{
                   height: "100%",
-                  background: "#f9fafb",
+                  background: "var(--color-bg-elevated)",
                   borderRadius: "8px",
                 }}
               />
@@ -599,7 +599,7 @@ const Dashboard: React.FC = () => {
                   key={i}
                   style={{
                     height: "36px",
-                    background: "#f9fafb",
+                    background: "var(--color-bg-elevated)",
                     borderRadius: "6px",
                   }}
                 />
@@ -674,7 +674,7 @@ const Dashboard: React.FC = () => {
                   key={i}
                   style={{
                     height: "36px",
-                    background: "#f9fafb",
+                    background: "var(--color-bg-elevated)",
                     borderRadius: "6px",
                   }}
                 />

@@ -45,6 +45,18 @@
   box-sizing: border-box;
 }
 
+/* ── Root anchors — force dark background at every level ────────────────── */
+html {
+  background-color: var(--color-bg-base);
+  color: var(--color-text-primary);
+}
+
+#root {
+  background-color: var(--color-bg-base);
+  color: var(--color-text-primary);
+  min-height: 100vh;
+}
+
 /* ── Base ───────────────────────────────────────────────────────────────── */
 body {
   margin: 0;

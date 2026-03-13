@@ -215,7 +215,7 @@ const Leads: React.FC = () => {
 
           {loading && <div style={{ fontSize: "12px" }}>Loading…</div>}
           {error && (
-            <div style={{ fontSize: "12px", color: "crimson", whiteSpace: "pre-wrap" }}>
+            <div style={{ fontSize: "12px", color: "var(--color-danger)", whiteSpace: "pre-wrap" }}>
               {error}
             </div>
           )}
@@ -225,7 +225,7 @@ const Leads: React.FC = () => {
               <li
                 key={l.id}
                 style={{
-                  border: "1px solid #e5e7eb",
+                  border: "1px solid var(--color-bg-border)",
                   borderRadius: "8px",
                   padding: "12px",
                   marginBottom: "10px",

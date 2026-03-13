@@ -144,7 +144,7 @@ const LeadProfile: React.FC = () => {
 
       {loading && <div style={{ fontSize: "12px" }}>Loading…</div>}
       {error && (
-        <div style={{ fontSize: "12px", color: "crimson", whiteSpace: "pre-wrap" }}>
+        <div style={{ fontSize: "12px", color: "var(--color-danger)", whiteSpace: "pre-wrap" }}>
           {error}
         </div>
       )}
@@ -152,7 +152,7 @@ const LeadProfile: React.FC = () => {
       {lead && (
         <div
           style={{
-            border: "1px solid #e5e7eb",
+            border: "1px solid var(--color-bg-border)",
             borderRadius: "8px",
             padding: "12px",
             marginTop: "12px",
@@ -215,7 +215,7 @@ const LeadProfile: React.FC = () => {
             <li
               key={m.id}
               style={{
-                border: "1px solid #e5e7eb",
+                border: "1px solid var(--color-bg-border)",
                 borderRadius: "8px",
                 padding: "10px",
                 marginBottom: "8px",
