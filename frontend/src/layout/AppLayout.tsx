@@ -295,7 +295,7 @@ const AppLayout: React.FC = () => {
               <div
                 style={{
                   fontSize: "11px",
-                  color: "#ef4444",
+                  color: "var(--color-danger)",
                   whiteSpace: "pre-wrap",
                 }}
               >
@@ -408,13 +408,13 @@ const AppLayout: React.FC = () => {
                   display: "inline-flex",
                   alignItems: "center",
                   gap: "5px",
-                  background: "#f0fdf4",
-                  color: "#15803d",
+                  background: "var(--color-success-bg)",
+                  color: "var(--color-success)",
                   fontSize: "11px",
                   fontWeight: 500,
                   padding: "4px 10px",
                   borderRadius: "999px",
-                  border: "0.5px solid #bbf7d0",
+                  border: "0.5px solid var(--color-success-border)",
                 }}
               >
                 <span
@@ -422,7 +422,7 @@ const AppLayout: React.FC = () => {
                     width: "6px",
                     height: "6px",
                     borderRadius: "50%",
-                    background: "#22c55e",
+                    background: "var(--color-success)",
                     display: "inline-block",
                   }}
                 />
