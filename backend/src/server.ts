@@ -1,6 +1,7 @@
 import "./config/env.js";
 import app from "./app.js";
 import OpenAI from "openai";
+import { startOutreachJob } from "./services/automation/outreachJob.js";
 
 const PORT = process.env.PORT || 4000;
 
@@ -34,6 +35,7 @@ async function bootstrap() {
   // ---------------------------------------------
   app.listen(PORT, () => {
     console.log(`Nexus OS backend running on port ${PORT}`);
+    startOutreachJob();
   });
 }
 

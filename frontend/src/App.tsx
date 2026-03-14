@@ -13,6 +13,7 @@ import ClientProfile from "./pages/ClientProfile";
 import Communication from "./pages/Communication";
 import Calendar from "./pages/Calendar";
 import Settings from "./pages/Settings";
+import Analytics from "./pages/Analytics";
 
 import AppLayout from "./layout/AppLayout";
 import RequireAuth from "./layout/RequireAuth";
@@ -59,6 +60,7 @@ const App: React.FC = () => {
           {/* Calendar */}
           <Route path="calendar" element={<Calendar />} />
 
+          <Route path="analytics" element={<Analytics />} />
           <Route path="settings" element={<Settings />} />
         </Route>
 

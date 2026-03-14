@@ -15,6 +15,8 @@ import conversationTestRoutes from "./routes/internal/conversationTest.js";
 import conversationRoutes from "./routes/internal/conversation.js";
 import emailRoutes from "./routes/internal/email.js";
 import aiSuggestRoutes from "./routes/internal/aiSuggest.js";
+import analyticsAiAdvisorRoutes from "./routes/internal/analyticsAiAdvisor.js";
+import automationRulesRoutes from "./routes/internal/automationRules.js";
 import meRoutes from "./routes/internal/me.js";
 
 /* =====================
@@ -93,6 +95,8 @@ app.use("/internal", followUpTestRoutes);
 app.use("/internal", conversationTestRoutes);
 app.use("/internal", conversationRoutes);
 app.use("/internal", aiSuggestRoutes);
+app.use("/internal", analyticsAiAdvisorRoutes);
+app.use("/internal", automationRulesRoutes);
 
 /* =====================================================
    AUTH
