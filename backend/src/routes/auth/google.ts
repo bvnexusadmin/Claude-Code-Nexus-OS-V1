@@ -110,8 +110,9 @@ router.get("/callback", async (req, res) => {
 
     if (error) throw error;
 
-    return res.send(
-      "Google Calendar connected successfully. You may close this window."
+    const frontendUrl = process.env.FRONTEND_URL ?? "http://localhost:3000";
+    return res.redirect(
+      `${frontendUrl}/settings?section=integrations&connected=google`
     );
   } catch (err: any) {
     console.error("❌ Google OAuth callback error:", err.message);

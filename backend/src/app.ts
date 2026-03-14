@@ -16,6 +16,7 @@ import conversationRoutes from "./routes/internal/conversation.js";
 import emailRoutes from "./routes/internal/email.js";
 import aiSuggestRoutes from "./routes/internal/aiSuggest.js";
 import askNexusRoutes from "./routes/internal/askNexus.js";
+import settingsRoutes from "./routes/internal/settings.js";
 import analyticsAiAdvisorRoutes from "./routes/internal/analyticsAiAdvisor.js";
 import automationRulesRoutes from "./routes/internal/automationRules.js";
 import meRoutes from "./routes/internal/me.js";
@@ -97,6 +98,7 @@ app.use("/internal", conversationTestRoutes);
 app.use("/internal", conversationRoutes);
 app.use("/internal", aiSuggestRoutes);
 app.use("/internal", askNexusRoutes);
+app.use("/internal", settingsRoutes);
 app.use("/internal", analyticsAiAdvisorRoutes);
 app.use("/internal", automationRulesRoutes);
 
