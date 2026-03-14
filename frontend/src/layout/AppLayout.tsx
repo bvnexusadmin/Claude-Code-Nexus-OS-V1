@@ -310,10 +310,10 @@ const AppLayout: React.FC = () => {
 
             {/* Ask Nexus */}
             <div className="nav-wrapper" style={{ marginTop: "8px" }}>
-              <div className="nav-item-ask">
+              <NavLink to="/ask-nexus" className="nav-item-ask">
                 <Icon d={Icons.sparkles} size={17} />
                 {!collapsed && <span className="nav-label">Ask Nexus</span>}
-              </div>
+              </NavLink>
               {collapsed && <span className="nav-tooltip">Ask Nexus</span>}
             </div>
 

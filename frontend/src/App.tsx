@@ -14,6 +14,7 @@ import Communication from "./pages/Communication";
 import Calendar from "./pages/Calendar";
 import Settings from "./pages/Settings";
 import Analytics from "./pages/Analytics";
+import AskNexus from "./pages/AskNexus";
 
 import AppLayout from "./layout/AppLayout";
 import RequireAuth from "./layout/RequireAuth";
@@ -61,6 +62,7 @@ const App: React.FC = () => {
           <Route path="calendar" element={<Calendar />} />
 
           <Route path="analytics" element={<Analytics />} />
+          <Route path="ask-nexus" element={<AskNexus />} />
           <Route path="settings" element={<Settings />} />
         </Route>
 
