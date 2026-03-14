@@ -14,6 +14,7 @@ import followUpTestRoutes from "./routes/internal/followUpTest.js";
 import conversationTestRoutes from "./routes/internal/conversationTest.js";
 import conversationRoutes from "./routes/internal/conversation.js";
 import emailRoutes from "./routes/internal/email.js";
+import aiSuggestRoutes from "./routes/internal/aiSuggest.js";
 import meRoutes from "./routes/internal/me.js";
 
 /* =====================
@@ -91,6 +92,7 @@ app.use("/internal", emailTestRoutes);
 app.use("/internal", followUpTestRoutes);
 app.use("/internal", conversationTestRoutes);
 app.use("/internal", conversationRoutes);
+app.use("/internal", aiSuggestRoutes);
 
 /* =====================================================
    AUTH

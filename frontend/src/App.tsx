@@ -10,6 +10,7 @@ import Leads from "./pages/Leads";
 import LeadProfile from "./pages/LeadProfile";
 import Clients from "./pages/Clients";
 import ClientProfile from "./pages/ClientProfile";
+import Communication from "./pages/Communication";
 import Settings from "./pages/Settings";
 
 import AppLayout from "./layout/AppLayout";
@@ -50,6 +51,9 @@ const App: React.FC = () => {
           {/* Clients */}
           <Route path="clients" element={<Clients />} />
           <Route path="clients/:clientId" element={<ClientProfile />} />
+
+          {/* Communication */}
+          <Route path="communication" element={<Communication />} />
 
           <Route path="settings" element={<Settings />} />
         </Route>
