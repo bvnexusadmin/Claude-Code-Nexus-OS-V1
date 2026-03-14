@@ -86,7 +86,7 @@ router.post(
               "Please write a helpful reply to send to this lead now.",
           },
         ],
-        max_tokens: 200,
+        max_completion_tokens: 200,
         temperature: 0.65,
       });
 
