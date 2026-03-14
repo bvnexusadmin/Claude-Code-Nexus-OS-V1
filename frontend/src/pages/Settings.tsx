@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { apiGet, apiPost } from "../lib/api";
 import { useTenant } from "../lib/tenant";
+import { useToast } from "../lib/toast";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -257,8 +258,8 @@ const SectionHeader: React.FC<{
   >
     <h2
       style={{
-        fontSize: "20px",
-        fontWeight: 700,
+        fontSize: "22px",
+        fontWeight: 600,
         color: "var(--color-text-primary)",
         margin: 0,
       }}
@@ -365,6 +366,7 @@ const ErrorBox: React.FC<{ msg: string; migration?: boolean }> = ({
 // ─── Business Info Section ────────────────────────────────────────────────────
 
 const BusinessInfoSection: React.FC = () => {
+  const { showToast } = useToast();
   const [form, setForm] = useState<BusinessForm>({
     name: "",
     phone: "",
@@ -400,9 +402,11 @@ const BusinessInfoSection: React.FC = () => {
     try {
       await apiPost("/internal/settings/business", form);
       setSuccess(true);
+      showToast("Business info saved", "success");
       setTimeout(() => setSuccess(false), 3000);
     } catch (err: any) {
       setError(err?.message ?? "Save failed");
+      showToast(err?.message ?? "Save failed", "error");
     } finally {
       setSaving(false);
     }
@@ -410,7 +414,11 @@ const BusinessInfoSection: React.FC = () => {
 
   if (loading) {
     return (
-      <div style={{ color: "#4a5a6b", fontSize: "13px" }}>Loading…</div>
+      <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+        {[...Array(5)].map((_, i) => (
+          <div key={i} className="skeleton" style={{ height: "52px", borderRadius: "7px" }} />
+        ))}
+      </div>
     );
   }
 
@@ -575,6 +583,7 @@ const BusinessInfoSection: React.FC = () => {
 
 const IntegrationsSection: React.FC = () => {
   const { activeClientId } = useTenant();
+  const { showToast } = useToast();
   const [searchParams] = useSearchParams();
   const [data, setData] = useState<IntegrationData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -613,10 +622,12 @@ const IntegrationsSection: React.FC = () => {
     try {
       await apiPost("/internal/settings/integrations", { provider, ...payload });
       setSavedProvider(provider);
+      showToast(`${provider.charAt(0).toUpperCase() + provider.slice(1)} settings saved`, "success");
       setTimeout(() => setSavedProvider(null), 3000);
       loadData();
     } catch (err: any) {
       setError(err?.message ?? "Save failed");
+      showToast(err?.message ?? "Save failed", "error");
     } finally {
       setSavingProvider(null);
     }
@@ -624,7 +635,11 @@ const IntegrationsSection: React.FC = () => {
 
   if (loading) {
     return (
-      <div style={{ color: "#4a5a6b", fontSize: "13px" }}>Loading…</div>
+      <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="skeleton" style={{ height: "80px", borderRadius: "10px" }} />
+        ))}
+      </div>
     );
   }
 
@@ -858,11 +873,18 @@ const InviteModal: React.FC<{
   onClose: () => void;
   onSuccess: () => void;
 }> = ({ onClose, onSuccess }) => {
+  const { showToast } = useToast();
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<"staff" | "admin">("staff");
   const [inviting, setInviting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", handleKey);
+    return () => document.removeEventListener("keydown", handleKey);
+  }, [onClose]);
 
   const handleInvite = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -874,9 +896,11 @@ const InviteModal: React.FC<{
         email: email.trim(),
         role,
       });
+      showToast(`Invitation sent to ${email.trim()}`, "success");
       onSuccess();
     } catch (err: any) {
       setError(err?.message ?? "Invite failed");
+      showToast(err?.message ?? "Invite failed", "error");
     } finally {
       setInviting(false);
     }
@@ -895,7 +919,7 @@ const InviteModal: React.FC<{
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        zIndex: 100,
+        zIndex: 300,
       }}
     >
       <div
@@ -906,6 +930,7 @@ const InviteModal: React.FC<{
           padding: "28px",
           width: "440px",
           maxWidth: "90vw",
+          boxShadow: "0 16px 48px rgba(0,0,0,0.6)",
         }}
       >
         <h3
@@ -981,6 +1006,7 @@ const InviteModal: React.FC<{
 
 const UsersSection: React.FC = () => {
   const { me } = useTenant();
+  const { showToast } = useToast();
   const [users, setUsers] = useState<UserRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -1019,9 +1045,11 @@ const UsersSection: React.FC = () => {
       });
       const data = await res.json();
       if (!res.ok || !data?.ok) throw new Error(data?.error ?? "Remove failed");
+      showToast("User removed", "success");
       loadUsers();
     } catch (err: any) {
       setError(err?.message ?? "Remove failed");
+      showToast(err?.message ?? "Remove failed", "error");
     } finally {
       setRemovingId(null);
     }
@@ -1094,8 +1122,10 @@ const UsersSection: React.FC = () => {
       {error && <ErrorBox msg={error} />}
 
       {loading ? (
-        <div style={{ color: "#4a5a6b", fontSize: "13px" }}>
-          Loading users…
+        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="skeleton" style={{ height: "44px", borderRadius: "7px" }} />
+          ))}
         </div>
       ) : (
         <Card style={{ padding: 0, overflow: "hidden" }}>
@@ -1449,7 +1479,11 @@ const NotificationsSection: React.FC = () => {
 
   if (loading) {
     return (
-      <div style={{ color: "#4a5a6b", fontSize: "13px" }}>Loading…</div>
+      <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+        {[...Array(7)].map((_, i) => (
+          <div key={i} className="skeleton" style={{ height: "44px", borderRadius: "7px" }} />
+        ))}
+      </div>
     );
   }
 

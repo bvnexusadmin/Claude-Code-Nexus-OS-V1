@@ -427,8 +427,20 @@ const Communication: React.FC = () => {
         {/* Contact list */}
         <div style={{ flex: 1, overflowY: "auto" }}>
           {convPreviews.length === 0 && (
-            <div style={{ padding: "24px 16px", fontSize: "13px", color: "#4a5a6b", textAlign: "center" }}>
-              {loadingMe ? "Loading…" : "No conversations yet."}
+            <div style={{ padding: "40px 16px", display: "flex", flexDirection: "column", alignItems: "center", gap: "10px", textAlign: "center" }}>
+              {loadingMe ? (
+                <div style={{ display: "flex", flexDirection: "column", gap: "8px", width: "100%", padding: "0 12px" }}>
+                  {[...Array(4)].map((_, i) => (
+                    <div key={i} className="skeleton" style={{ height: "56px", borderRadius: "8px" }} />
+                  ))}
+                </div>
+              ) : (
+                <>
+                  <SmsIcon size={32} color="#1e2d40" />
+                  <div style={{ fontSize: "14px", fontWeight: 600, color: "#f0f4f8" }}>No conversations yet</div>
+                  <div style={{ fontSize: "12px", color: "#8899aa" }}>Messages will appear here</div>
+                </>
+              )}
             </div>
           )}
           {convPreviews.map((c) => {
@@ -740,14 +752,14 @@ const Communication: React.FC = () => {
           /* Empty state */
           <div style={{
             flex: 1, display: "flex", alignItems: "center", justifyContent: "center",
-            flexDirection: "column", gap: "12px",
+            flexDirection: "column", gap: "12px", padding: "32px",
           }}>
-            <SmsIcon size={32} color="#1e2d40" />
-            <div style={{ fontSize: "15px", color: "#4a5a6b", fontWeight: 500 }}>
+            <SmsIcon size={40} color="#1e2d40" />
+            <div style={{ fontSize: "15px", fontWeight: 600, color: "#f0f4f8" }}>
               Select a conversation
             </div>
-            <div style={{ fontSize: "13px", color: "#4a5a6b" }}>
-              Choose a contact from the list to start messaging.
+            <div style={{ fontSize: "13px", color: "#8899aa", textAlign: "center", maxWidth: "280px", lineHeight: 1.5 }}>
+              Choose a contact from the list to view messages and reply
             </div>
           </div>
         )}

@@ -1129,8 +1129,12 @@ const ActivityLog: React.FC<{ activity: ActivityEntry[] }> = ({ activity }) => {
   return (
     <Card title="Outreach Activity Log">
       {activity.length === 0 ? (
-        <div style={{ fontSize: "13px", color: "#4a5a6b", padding: "12px 0", fontStyle: "italic" }}>
-          No outreach activity yet. Enable rules above to start automating.
+        <div style={{ padding: "32px 0", display: "flex", flexDirection: "column", alignItems: "center", gap: "10px", textAlign: "center" }}>
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#4a5a6b" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13 19.79 19.79 0 0 1 1.61 4.41 2 2 0 0 1 3.6 2.25h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91" />
+          </svg>
+          <div style={{ fontSize: "14px", fontWeight: 600, color: "#f0f4f8" }}>No outreach activity yet</div>
+          <div style={{ fontSize: "12px", color: "#8899aa" }}>Enable automation rules above to start outreach</div>
         </div>
       ) : (
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
@@ -1526,10 +1530,10 @@ const Analytics: React.FC = () => {
   }
 
   return (
-    <div style={{ padding: "24px 28px", minHeight: "100%" }}>
+    <div style={{ padding: "32px", minHeight: "100%" }}>
       {/* Page header */}
-      <div style={{ marginBottom: "20px" }}>
-        <h2 style={{ fontSize: "20px", fontWeight: 700, color: "#f0f4f8", margin: 0 }}>
+      <div style={{ marginBottom: "24px" }}>
+        <h2 style={{ fontSize: "22px", fontWeight: 600, color: "#f0f4f8", margin: 0 }}>
           Analytics
         </h2>
         <p style={{ fontSize: "13px", color: "#8899aa", margin: "4px 0 0" }}>

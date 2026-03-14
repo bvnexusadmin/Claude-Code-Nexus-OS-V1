@@ -258,9 +258,9 @@ const Leads: React.FC = () => {
   }, [leads, lastByLead, q, status]);
 
   return (
-    <div style={{ padding: "24px" }}>
+    <div style={{ padding: "32px" }}>
       {/* Page header */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "24px" }}>
         <h2 style={{ fontSize: "22px", fontWeight: 600, color: "#f0f4f8", margin: 0 }}>Leads</h2>
         <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
           <input
@@ -299,7 +299,7 @@ const Leads: React.FC = () => {
       </div>
 
       {/* Status filter pills */}
-      <div style={{ display: "flex", gap: "6px", marginBottom: "20px" }}>
+      <div style={{ display: "flex", gap: "6px", marginBottom: "24px" }}>
         {STATUS_PILLS.map((pill) => {
           const active = status === pill.value;
           return (
@@ -323,11 +323,10 @@ const Leads: React.FC = () => {
         <div style={{ fontSize: "12px", color: "#4a5a6b" }}>No active tenant selected.</div>
       ) : (
         <>
-          {loading && <div style={{ fontSize: "12px", color: "#8899aa", marginBottom: "12px" }}>Loading…</div>}
           {error && <div style={{ fontSize: "12px", color: "#ef4444", marginBottom: "12px", whiteSpace: "pre-wrap" }}>{error}</div>}
 
           {/* Table */}
-          <div style={{ border: "1px solid #1e2d40", borderRadius: "8px", overflow: "hidden" }}>
+          <div style={{ border: "1px solid #1e2d40", borderRadius: "10px", overflow: "hidden" }}>
             {/* Header */}
             <div style={{
               display: "grid", gridTemplateColumns: COL,
@@ -337,12 +336,21 @@ const Leads: React.FC = () => {
               letterSpacing: "0.06em",
             }}>
               {["Name", "Contact", "Source", "Status", "Last Activity", "Score", "Assigned"].map((h) => (
-                <div key={h}>{h}</div>
+                <div key={h} style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{h}</div>
               ))}
             </div>
 
+            {/* Skeleton loading */}
+            {loading && (
+              <div style={{ padding: "12px 16px", display: "flex", flexDirection: "column", gap: "8px" }}>
+                {[...Array(8)].map((_, i) => (
+                  <div key={i} className="skeleton" style={{ height: "36px" }} />
+                ))}
+              </div>
+            )}
+
             {/* Rows */}
-            {items.map((l, idx) => {
+            {!loading && items.map((l, idx) => {
               const score = deriveLeadScore(l);
               const isLast = idx === items.length - 1;
               return (
@@ -357,6 +365,7 @@ const Leads: React.FC = () => {
                     height: "44px", cursor: "pointer",
                     background: hoveredRow === l.id ? "#1a2235" : "#111827",
                     borderBottom: isLast ? "none" : "1px solid #1e2d40",
+                    transition: "background 0.15s ease",
                   }}
                 >
                   <div style={{
@@ -373,7 +382,7 @@ const Leads: React.FC = () => {
                   </div>
                   <div><SourceBadge source={l.source} /></div>
                   <div><StatusBadge status={l.status} /></div>
-                  <div style={{ fontSize: "12px", color: "#8899aa" }}>
+                  <div style={{ fontSize: "12px", color: "#8899aa", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                     {timeAgo(l.last_message_at ?? l.created_at)}
                   </div>
                   <div><ScoreCell score={score} /></div>
@@ -391,8 +400,20 @@ const Leads: React.FC = () => {
             })}
 
             {items.length === 0 && !loading && (
-              <div style={{ padding: "32px 16px", fontSize: "13px", color: "#4a5a6b", textAlign: "center" }}>
-                No leads found.
+              <div style={{ padding: "56px 24px", display: "flex", flexDirection: "column", alignItems: "center", gap: "12px", textAlign: "center" }}>
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#4a5a6b" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
+                <div style={{ fontSize: "15px", fontWeight: 600, color: "#f0f4f8" }}>
+                  {q || status !== "all" ? "No leads match your filters" : "No leads yet"}
+                </div>
+                <div style={{ fontSize: "13px", color: "#8899aa", maxWidth: "360px", lineHeight: 1.5 }}>
+                  {q || status !== "all"
+                    ? "Try adjusting your search or status filter"
+                    : "Leads will appear here when captured via SMS, email, or web form"}
+                </div>
               </div>
             )}
           </div>

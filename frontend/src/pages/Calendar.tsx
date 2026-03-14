@@ -443,10 +443,14 @@ function DayView({
   );
 
   return (
-    <div style={{ padding: "24px", overflowY: "auto", height: "100%", boxSizing: "border-box" }}>
+    <div style={{ padding: "32px", overflowY: "auto", height: "100%", boxSizing: "border-box" }}>
       {dayEvs.length === 0 && (
-        <div style={{ fontSize: "14px", color: "#4a5a6b", textAlign: "center", marginTop: "60px" }}>
-          No bookings on this day.
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px", textAlign: "center", marginTop: "80px" }}>
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#4a5a6b" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
+          </svg>
+          <div style={{ fontSize: "15px", fontWeight: 600, color: "#f0f4f8" }}>No bookings on this day</div>
+          <div style={{ fontSize: "13px", color: "#8899aa" }}>Click + New Booking to schedule an appointment</div>
         </div>
       )}
       {dayEvs.map((ev) => {
@@ -505,10 +509,14 @@ function AgendaView({
   }, [events]);
 
   return (
-    <div style={{ padding: "24px", overflowY: "auto", height: "100%", boxSizing: "border-box" }}>
+    <div style={{ padding: "32px", overflowY: "auto", height: "100%", boxSizing: "border-box" }}>
       {grouped.length === 0 && (
-        <div style={{ fontSize: "14px", color: "#4a5a6b", textAlign: "center", marginTop: "60px" }}>
-          No upcoming bookings in the next 30 days.
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px", textAlign: "center", marginTop: "80px" }}>
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#4a5a6b" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
+          </svg>
+          <div style={{ fontSize: "15px", fontWeight: 600, color: "#f0f4f8" }}>No upcoming bookings</div>
+          <div style={{ fontSize: "13px", color: "#8899aa" }}>No bookings scheduled for the next 30 days</div>
         </div>
       )}
       {grouped.map(([dateKey, dayEvs]) => (
@@ -1198,7 +1206,13 @@ const Calendar: React.FC = () => {
           <span style={{ fontSize: "15px", fontWeight: 600, color: "#f0f4f8", marginLeft: "6px" }}>
             {getDateLabel(view, viewDate)}
           </span>
-          {loading && <span style={{ fontSize: "12px", color: "#4a5a6b", marginLeft: "8px" }}>Loading…</span>}
+          {loading && (
+            <span style={{
+              display: "inline-block", width: "60px", height: "14px", borderRadius: "4px",
+              background: "#1a2235", marginLeft: "8px",
+              animation: "nexusSkeleton 1.5s ease-in-out infinite",
+            }} />
+          )}
           {error && <span style={{ fontSize: "12px", color: "#ef4444", marginLeft: "8px" }}>{error}</span>}
         </div>
       </div>

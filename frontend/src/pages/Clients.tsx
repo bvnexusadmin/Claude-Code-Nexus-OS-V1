@@ -175,7 +175,7 @@ const Clients: React.FC = () => {
   });
 
   return (
-    <div style={{ padding: "24px" }}>
+    <div style={{ padding: "32px" }}>
       {/* Header */}
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "4px" }}>
         <h2 style={{ fontSize: "22px", fontWeight: 600, color: "#f0f4f8", margin: 0 }}>Clients</h2>
@@ -210,10 +210,9 @@ const Clients: React.FC = () => {
         <div style={{ fontSize: "12px", color: "#4a5a6b" }}>No active tenant selected.</div>
       ) : (
         <>
-          {loading && <div style={{ fontSize: "12px", color: "#8899aa", marginBottom: "12px" }}>Loading…</div>}
           {error && <div style={{ fontSize: "12px", color: "#ef4444", marginBottom: "12px", whiteSpace: "pre-wrap" }}>{error}</div>}
 
-          <div style={{ border: "1px solid #1e2d40", borderRadius: "8px", overflow: "hidden" }}>
+          <div style={{ border: "1px solid #1e2d40", borderRadius: "10px", overflow: "hidden" }}>
             {/* Table header */}
             <div style={{
               display: "grid", gridTemplateColumns: COL,
@@ -223,12 +222,21 @@ const Clients: React.FC = () => {
               letterSpacing: "0.06em",
             }}>
               {["Name", "Contact", "Total Bookings", "Last Booking", "Status", "Value"].map((h) => (
-                <div key={h}>{h}</div>
+                <div key={h} style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{h}</div>
               ))}
             </div>
 
+            {/* Skeleton loading */}
+            {loading && (
+              <div style={{ padding: "12px 16px", display: "flex", flexDirection: "column", gap: "8px" }}>
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className="skeleton" style={{ height: "36px" }} />
+                ))}
+              </div>
+            )}
+
             {/* Rows */}
-            {items.map((c, idx) => {
+            {!loading && items.map((c, idx) => {
               const isLast = idx === items.length - 1;
               const isArchived = c.status === "archived";
               const statusLabel = isArchived ? "Archived" : "Active";
@@ -248,6 +256,7 @@ const Clients: React.FC = () => {
                     height: "44px", cursor: "pointer",
                     background: hoveredRow === c.id ? "#1a2235" : "#111827",
                     borderBottom: isLast ? "none" : "1px solid #1e2d40",
+                    transition: "background 0.15s ease",
                   }}
                 >
                   <div style={{
@@ -265,7 +274,7 @@ const Clients: React.FC = () => {
                   <div style={{ fontSize: "13px", color: "#f0f4f8", fontWeight: 500 }}>
                     {c.totalBookings > 0 ? c.totalBookings : <span style={{ color: "#4a5a6b" }}>0</span>}
                   </div>
-                  <div style={{ fontSize: "13px", color: "#8899aa" }}>
+                  <div style={{ fontSize: "13px", color: "#8899aa", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                     {fmtDate(c.lastBooking)}
                   </div>
                   <div>
@@ -285,8 +294,21 @@ const Clients: React.FC = () => {
             })}
 
             {items.length === 0 && !loading && (
-              <div style={{ padding: "32px 16px", fontSize: "13px", color: "#4a5a6b", textAlign: "center" }}>
-                No {tab} clients found.
+              <div style={{ padding: "56px 24px", display: "flex", flexDirection: "column", alignItems: "center", gap: "12px", textAlign: "center" }}>
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#4a5a6b" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                  <polyline points="9 22 9 12 15 12 15 22" />
+                </svg>
+                <div style={{ fontSize: "15px", fontWeight: 600, color: "#f0f4f8" }}>
+                  {q ? "No clients match your search" : tab === "archived" ? "No archived clients" : "No clients yet"}
+                </div>
+                <div style={{ fontSize: "13px", color: "#8899aa", maxWidth: "360px", lineHeight: 1.5 }}>
+                  {q
+                    ? "Try a different search term"
+                    : tab === "archived"
+                    ? "Archived clients will appear here"
+                    : "Clients appear here once leads are converted or booked"}
+                </div>
               </div>
             )}
           </div>

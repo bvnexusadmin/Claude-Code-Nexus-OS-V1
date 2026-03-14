@@ -668,7 +668,7 @@ const Dashboard: React.FC = () => {
   // ── Render ──────────────────────────────────────────────────────────────────
 
   return (
-    <div style={{ padding: "24px", display: "flex", flexDirection: "column", gap: "20px" }}>
+    <div style={{ padding: "32px", display: "flex", flexDirection: "column", gap: "24px" }}>
 
       {/* ── Page sub-header — date range ──────────────────────────────── */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -795,11 +795,19 @@ const Dashboard: React.FC = () => {
           {loading ? (
             <div style={{ padding: "12px 20px", display: "flex", flexDirection: "column", gap: "10px" }}>
               {[...Array(5)].map((_, i) => (
-                <div key={i} style={{ height: "32px", background: "#1a2235", borderRadius: "6px" }} />
+                <div key={i} className="skeleton" style={{ height: "36px" }} />
               ))}
             </div>
           ) : data?.recentLeads.length === 0 ? (
-            <div style={{ padding: "20px", color: "#4a5a6b", fontSize: "13px" }}>No leads yet.</div>
+            <div style={{ padding: "32px 20px", display: "flex", flexDirection: "column", alignItems: "center", gap: "10px", textAlign: "center" }}>
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#4a5a6b" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+              </svg>
+              <div style={{ fontSize: "14px", fontWeight: 600, color: "#f0f4f8" }}>No leads yet</div>
+              <div style={{ fontSize: "12px", color: "#8899aa", maxWidth: "240px" }}>Leads will appear here once captured via SMS, email, or voice</div>
+            </div>
           ) : (
             data?.recentLeads.map((lead) => (
               <div
@@ -853,13 +861,19 @@ const Dashboard: React.FC = () => {
             }}
           >
             {loading ? (
-              <div style={{ padding: "0 20px 16px", display: "flex", flexDirection: "column", gap: "10px" }}>
+              <div style={{ padding: "12px 20px 16px", display: "flex", flexDirection: "column", gap: "10px" }}>
                 {[...Array(5)].map((_, i) => (
-                  <div key={i} style={{ height: "36px", background: "#1a2235", borderRadius: "6px" }} />
+                  <div key={i} className="skeleton" style={{ height: "40px" }} />
                 ))}
               </div>
             ) : data?.activityFeed.length === 0 ? (
-              <div style={{ padding: "0 20px 16px", color: "#4a5a6b", fontSize: "13px" }}>No recent activity.</div>
+              <div style={{ padding: "32px 20px", display: "flex", flexDirection: "column", alignItems: "center", gap: "10px", textAlign: "center" }}>
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#4a5a6b" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
+                </svg>
+                <div style={{ fontSize: "13px", fontWeight: 600, color: "#f0f4f8" }}>No activity yet</div>
+                <div style={{ fontSize: "12px", color: "#8899aa" }}>Messages and calls will appear here</div>
+              </div>
             ) : (
               data?.activityFeed.map((item) => (
                 <div

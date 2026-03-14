@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { MeResponse, TenantProvider } from "../lib/tenant";
+import { ToastProvider } from "../lib/toast";
 
 const API_BASE = "";
 const TENANT_STORAGE_KEY = "nexus_active_client_id";
@@ -220,6 +221,7 @@ const AppLayout: React.FC = () => {
   // ── Render ───────────────────────────────────────────────────────────────
 
   return (
+    <ToastProvider>
     <TenantProvider
       value={{
         me,
@@ -248,7 +250,7 @@ const AppLayout: React.FC = () => {
             position: "fixed",
             top: 0,
             left: 0,
-            zIndex: 20,
+            zIndex: 100,
             overflow: "hidden",
             transition: "width 0.2s ease",
           }}
@@ -492,6 +494,7 @@ const AppLayout: React.FC = () => {
         </div>
       </div>
     </TenantProvider>
+    </ToastProvider>
   );
 };
 

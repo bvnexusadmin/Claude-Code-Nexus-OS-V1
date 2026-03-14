@@ -254,3 +254,216 @@ a:hover { color: #38bdf8; }
   background: var(--color-bg-elevated);
   color: var(--color-text-primary);
 }
+
+/* ── Global transitions ──────────────────────────────────────────────────── */
+button, a, [role="button"] {
+  transition: all 0.15s ease;
+}
+
+/* ── Global focus states ─────────────────────────────────────────────────── */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* ── Global dark form inputs ─────────────────────────────────────────────── */
+input, select, textarea {
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-bg-border);
+  color: var(--color-text-primary);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--color-text-muted);
+}
+
+input:focus,
+textarea:focus {
+  border-color: var(--color-accent);
+  outline: none;
+}
+
+select:focus {
+  border-color: var(--color-accent);
+  outline: none;
+}
+
+/* ── Autofill dark override ──────────────────────────────────────────────── */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px #1a2235 inset !important;
+  -webkit-text-fill-color: #f0f4f8 !important;
+  caret-color: #f0f4f8;
+}
+
+/* ── Scrollbar on ALL scrollable containers ──────────────────────────────── */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #1e2d40 #0a0e1a;
+}
+
+/* ── Skeleton loader animation ───────────────────────────────────────────── */
+@keyframes nexusSkeleton {
+  0%   { background-color: #1a2235; }
+  50%  { background-color: #232f45; }
+  100% { background-color: #1a2235; }
+}
+
+.skeleton {
+  animation: nexusSkeleton 1.5s ease-in-out infinite;
+  border-radius: 6px;
+}
+
+/* ── Toast notifications ─────────────────────────────────────────────────── */
+.nexus-toast-container {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 380px;
+  pointer-events: none;
+}
+
+.nexus-toast {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-bg-border);
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  pointer-events: auto;
+  animation: nexusToastIn 0.2s ease;
+  border-left: 3px solid var(--color-bg-border);
+}
+
+.nexus-toast.success { border-left-color: var(--color-success); }
+.nexus-toast.error   { border-left-color: var(--color-danger); }
+.nexus-toast.warning { border-left-color: var(--color-warning); }
+.nexus-toast.info    { border-left-color: var(--color-accent); }
+
+@keyframes nexusToastIn {
+  from { opacity: 0; transform: translateX(16px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ── Modal overlay ───────────────────────────────────────────────────────── */
+.nexus-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nexus-modal {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-bg-border);
+  border-radius: 12px;
+  max-width: 560px;
+  width: 90%;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.6);
+}
+
+/* ── Calendar library override — kill all white/light backgrounds ─────────── */
+.rbc-calendar,
+.rbc-month-view,
+.rbc-time-view,
+.rbc-agenda-view,
+.rbc-header,
+.rbc-day-bg,
+.rbc-off-range-bg,
+.rbc-today,
+.rbc-time-content,
+.rbc-time-header,
+.rbc-time-header-content,
+.rbc-time-gutter,
+.rbc-allday-cell,
+.rbc-agenda-table,
+.rbc-agenda-view table,
+.rbc-agenda-view table thead,
+.rbc-agenda-view table tbody {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+.rbc-toolbar button,
+.rbc-toolbar button:active,
+.rbc-toolbar button.rbc-active {
+  background: var(--color-bg-elevated) !important;
+  color: var(--color-text-primary) !important;
+  border-color: var(--color-bg-border) !important;
+}
+
+.rbc-toolbar button:hover {
+  background: var(--color-bg-border) !important;
+}
+
+.rbc-header {
+  color: var(--color-text-secondary) !important;
+  border-color: var(--color-bg-border) !important;
+}
+
+.rbc-day-bg + .rbc-day-bg,
+.rbc-month-row + .rbc-month-row,
+.rbc-header + .rbc-header {
+  border-color: var(--color-bg-border) !important;
+}
+
+.rbc-off-range-bg { background: rgba(10,14,26,0.4) !important; }
+.rbc-today { background: rgba(14,165,233,0.06) !important; }
+
+.rbc-event {
+  background-color: var(--color-accent) !important;
+  border: none !important;
+}
+
+.rbc-selected {
+  background-color: var(--color-accent-hover) !important;
+}
+
+.rbc-time-slot { color: var(--color-text-muted) !important; }
+.rbc-label     { color: var(--color-text-secondary) !important; }
+
+.rbc-agenda-date-cell,
+.rbc-agenda-time-cell,
+.rbc-agenda-event-cell {
+  color: var(--color-text-primary) !important;
+  border-color: var(--color-bg-border) !important;
+  background: transparent !important;
+}
+
+/* ── Slide-out panels ────────────────────────────────────────────────────── */
+.nexus-panel {
+  position: fixed;
+  z-index: 200;
+}
+
+/* ── Z-index baseline overrides ──────────────────────────────────────────── */
+aside.sidebar { z-index: 100 !important; }
+
+/* ── Link color reset ────────────────────────────────────────────────────── */
+a { color: var(--color-accent); text-decoration: none; }
+a:hover { color: var(--color-accent-hover); }
