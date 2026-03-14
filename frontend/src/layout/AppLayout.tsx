@@ -232,7 +232,7 @@ const AppLayout: React.FC = () => {
         refreshMe,
       }}
     >
-      <div style={{ display: "flex", height: "100vh", overflow: "hidden", background: "var(--color-bg-base)" }}>
+      <div style={{ display: "flex", height: "100vh", overflow: "hidden", background: "#0a0e1a" }}>
 
         {/* ── Sidebar ───────────────────────────────────────────────────── */}
         <aside
@@ -240,8 +240,8 @@ const AppLayout: React.FC = () => {
           style={{
             width: sidebarWidth,
             flexShrink: 0,
-            background: "var(--color-bg-base)",
-            borderRight: "1px solid var(--color-bg-border)",
+            background: "#0a0e1a",
+            borderRight: "1px solid #1e2d40",
             display: "flex",
             flexDirection: "column",
             height: "100vh",
@@ -278,7 +278,7 @@ const AppLayout: React.FC = () => {
             )}
           </div>
 
-          <div style={{ height: "1px", background: "var(--color-bg-border)", flexShrink: 0 }} />
+          <div style={{ height: "1px", background: "#1e2d40", flexShrink: 0 }} />
 
           {/* ── Navigation ──────────────────────────────────────────────── */}
           <nav
@@ -299,9 +299,9 @@ const AppLayout: React.FC = () => {
                   className={({ isActive }) => `nav-item${isActive ? " active" : ""}`}
                 >
                   <Icon d={item.icon} size={17} />
-                  <span className="nav-label">{item.label}</span>
+                  {!collapsed && <span className="nav-label">{item.label}</span>}
                 </NavLink>
-                <span className="nav-tooltip">{item.label}</span>
+                {collapsed && <span className="nav-tooltip">{item.label}</span>}
               </div>
             ))}
 
@@ -312,9 +312,9 @@ const AppLayout: React.FC = () => {
             <div className="nav-wrapper" style={{ marginTop: "8px" }}>
               <div className="nav-item-ask">
                 <Icon d={Icons.sparkles} size={17} />
-                <span className="nav-label">Ask Nexus</span>
+                {!collapsed && <span className="nav-label">Ask Nexus</span>}
               </div>
-              <span className="nav-tooltip">Ask Nexus</span>
+              {collapsed && <span className="nav-tooltip">Ask Nexus</span>}
             </div>
 
             {/* Collapse toggle */}
@@ -328,7 +328,7 @@ const AppLayout: React.FC = () => {
             </button>
           </nav>
 
-          <div style={{ height: "1px", background: "var(--color-bg-border)", flexShrink: 0 }} />
+          <div style={{ height: "1px", background: "#1e2d40", flexShrink: 0 }} />
 
           {/* ── User info (bottom) ──────────────────────────────────────── */}
           <div
@@ -413,7 +413,7 @@ const AppLayout: React.FC = () => {
             flexDirection: "column",
             height: "100vh",
             overflow: "hidden",
-            background: "var(--color-bg-base)",
+            background: "#0a0e1a",
             transition: "margin-left 0.2s ease",
           }}
         >
@@ -422,8 +422,8 @@ const AppLayout: React.FC = () => {
             style={{
               height: "56px",
               flexShrink: 0,
-              background: "var(--color-bg-surface)",
-              borderBottom: "1px solid var(--color-bg-border)",
+              background: "#111827",
+              borderBottom: "1px solid #1e2d40",
               padding: "0 28px",
               display: "flex",
               alignItems: "center",
@@ -486,7 +486,7 @@ const AppLayout: React.FC = () => {
           </header>
 
           {/* Page content */}
-          <main style={{ flex: 1, overflow: "auto", background: "var(--color-bg-base)" }}>
+          <main style={{ flex: 1, overflow: "auto", background: "#0a0e1a" }}>
             <Outlet />
           </main>
         </div>
