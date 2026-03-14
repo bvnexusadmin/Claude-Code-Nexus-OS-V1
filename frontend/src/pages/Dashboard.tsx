@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -13,7 +14,9 @@ import { useTenant } from "../lib/tenant";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
-// ── Types ────────────────────────────────────────────────────────────────────
+// ── Types ─────────────────────────────────────────────────────────────────────
+
+type DateRange = "today" | "week" | "month";
 
 interface Lead {
   id: string;
@@ -39,14 +42,22 @@ interface Message {
   lead_id: string | null;
 }
 
+interface FunnelData {
+  new: number;
+  contacted: number;
+  qualified: number;
+  converted: number;
+}
+
 interface DashboardData {
-  leadsThisMonth: number;
+  leadsThisPeriod: number;
   bookingsConfirmed: number;
   totalLeads: number;
   channelCounts: Record<string, number>;
   weeklyBookings: Record<string, number>;
   recentLeads: Lead[];
   activityFeed: ActivityItem[];
+  funnel: FunnelData;
 }
 
 interface ActivityItem {
@@ -56,7 +67,7 @@ interface ActivityItem {
   time: string;
 }
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
+// ── Helpers ───────────────────────────────────────────────────────────────────
 
 function fmtRelative(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime();
@@ -74,10 +85,17 @@ function fmtChannel(ch: string | null): string {
   return ch.charAt(0).toUpperCase() + ch.slice(1).toLowerCase();
 }
 
-function startOfMonth(): string {
+function getRangeStart(range: DateRange): string {
   const d = new Date();
-  d.setDate(1);
-  d.setHours(0, 0, 0, 0);
+  if (range === "today") {
+    d.setHours(0, 0, 0, 0);
+  } else if (range === "week") {
+    d.setDate(d.getDate() - 6);
+    d.setHours(0, 0, 0, 0);
+  } else {
+    d.setDate(1);
+    d.setHours(0, 0, 0, 0);
+  }
   return d.toISOString();
 }
 
@@ -110,7 +128,12 @@ function last7DayKeys(): string[] {
   return keys;
 }
 
-// ── Sub-components ───────────────────────────────────────────────────────────
+function pct(a: number, b: number): string {
+  if (b === 0) return "0%";
+  return `${Math.round((a / b) * 100)}%`;
+}
+
+// ── Sub-components ────────────────────────────────────────────────────────────
 
 const Card: React.FC<{
   children: React.ReactNode;
@@ -134,16 +157,18 @@ const StatusPill: React.FC<{ status: string }> = ({ status }) => {
   const s = status.toLowerCase();
   let bg = "rgba(74, 90, 107, 0.2)";
   let color = "#8899aa";
-  if (s === "booked" || s === "confirmed") {
+  if (s === "booked" || s === "confirmed" || s === "active") {
     bg = "rgba(16, 185, 129, 0.15)"; color = "#10b981";
-  } else if (s === "qualifying" || s === "open") {
-    bg = "rgba(99, 102, 241, 0.15)"; color = "#6366f1";
+  } else if (s === "qualifying" || s === "open" || s === "pending" || s === "follow-up") {
+    bg = "rgba(245, 158, 11, 0.15)"; color = "#f59e0b";
   } else if (s === "new") {
     bg = "rgba(14, 165, 233, 0.15)"; color = "#0ea5e9";
-  } else if (s === "escalated") {
+  } else if (s === "escalated" || s === "lost" || s === "cancelled") {
     bg = "rgba(239, 68, 68, 0.15)"; color = "#ef4444";
   } else if (s === "closed") {
     bg = "rgba(74, 90, 107, 0.2)"; color = "#4a5a6b";
+  } else if (s === "ai") {
+    bg = "rgba(99, 102, 241, 0.15)"; color = "#6366f1";
   }
   return (
     <span
@@ -151,15 +176,41 @@ const StatusPill: React.FC<{ status: string }> = ({ status }) => {
         display: "inline-flex",
         alignItems: "center",
         padding: "2px 8px",
-        borderRadius: "999px",
+        borderRadius: "20px",
         fontSize: "11px",
-        fontWeight: 500,
+        fontWeight: 600,
         background: bg,
         color,
         whiteSpace: "nowrap",
       }}
     >
       {status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()}
+    </span>
+  );
+};
+
+const SourcePill: React.FC<{ source: string | null }> = ({ source }) => {
+  const s = (source ?? "unknown").toLowerCase();
+  let bg = "rgba(74, 90, 107, 0.2)";
+  let color = "#8899aa";
+  if (s === "sms") { bg = "rgba(14, 165, 233, 0.15)"; color = "#0ea5e9"; }
+  else if (s === "voice" || s === "call") { bg = "rgba(16, 185, 129, 0.15)"; color = "#10b981"; }
+  else if (s === "email") { bg = "rgba(99, 102, 241, 0.15)"; color = "#6366f1"; }
+  return (
+    <span
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        padding: "2px 8px",
+        borderRadius: "20px",
+        fontSize: "11px",
+        fontWeight: 600,
+        background: bg,
+        color,
+        whiteSpace: "nowrap",
+      }}
+    >
+      {fmtChannel(source)}
     </span>
   );
 };
@@ -183,52 +234,26 @@ const MetricCard: React.FC<{
     >
       {label}
     </div>
-    <div
-      style={{
-        fontSize: "36px",
-        fontWeight: 700,
-        color: "#f0f4f8",
-        lineHeight: 1,
-      }}
-    >
+    <div style={{ fontSize: "36px", fontWeight: 700, color: "#f0f4f8", lineHeight: 1 }}>
       {loading ? (
-        <span
-          style={{
-            display: "inline-block",
-            width: "60px",
-            height: "36px",
-            background: "#1a2235",
-            borderRadius: "6px",
-          }}
-        />
+        <span style={{ display: "inline-block", width: "60px", height: "36px", background: "#1a2235", borderRadius: "6px" }} />
       ) : (
         value
       )}
     </div>
     {sub && !loading && (
-      <div
-        style={{
-          fontSize: "13px",
-          color: "#8899aa",
-          marginTop: "6px",
-        }}
-      >
-        {sub}
-      </div>
+      <div style={{ fontSize: "13px", color: "#8899aa", marginTop: "6px" }}>{sub}</div>
     )}
   </Card>
 );
 
 const ActivityIcon: React.FC<{ type: ActivityItem["type"] }> = ({ type }) => {
-  const configs: Record<
-    ActivityItem["type"],
-    { bg: string; color: string; label: string }
-  > = {
-    sms: { bg: "rgba(14, 165, 233, 0.12)", color: "#0ea5e9", label: "SMS" },
-    voice: { bg: "rgba(16, 185, 129, 0.12)", color: "#10b981", label: "📞" },
-    email: { bg: "rgba(99, 102, 241, 0.12)", color: "#6366f1", label: "@" },
-    booking: { bg: "rgba(245, 158, 11, 0.12)", color: "#f59e0b", label: "B" },
-    lead: { bg: "rgba(16, 185, 129, 0.12)", color: "#10b981", label: "L" },
+  const configs: Record<ActivityItem["type"], { bg: string; color: string; label: string }> = {
+    sms:     { bg: "rgba(14, 165, 233, 0.12)", color: "#0ea5e9", label: "SMS" },
+    voice:   { bg: "rgba(16, 185, 129, 0.12)", color: "#10b981", label: "📞" },
+    email:   { bg: "rgba(99, 102, 241, 0.12)", color: "#6366f1", label: "@" },
+    booking: { bg: "rgba(245, 158, 11, 0.12)",  color: "#f59e0b", label: "B" },
+    lead:    { bg: "rgba(16, 185, 129, 0.12)", color: "#10b981", label: "L" },
   };
   const cfg = configs[type] ?? configs["sms"];
   return (
@@ -236,6 +261,7 @@ const ActivityIcon: React.FC<{ type: ActivityItem["type"] }> = ({ type }) => {
       style={{
         width: "30px",
         height: "30px",
+        minWidth: "30px",
         borderRadius: "8px",
         background: cfg.bg,
         color: cfg.color,
@@ -243,7 +269,7 @@ const ActivityIcon: React.FC<{ type: ActivityItem["type"] }> = ({ type }) => {
         alignItems: "center",
         justifyContent: "center",
         fontSize: "11px",
-        fontWeight: 500,
+        fontWeight: 600,
         flexShrink: 0,
       }}
     >
@@ -252,7 +278,179 @@ const ActivityIcon: React.FC<{ type: ActivityItem["type"] }> = ({ type }) => {
   );
 };
 
-// ── Main component ───────────────────────────────────────────────────────────
+// ── Lead Funnel ───────────────────────────────────────────────────────────────
+
+const LeadFunnel: React.FC<{ funnel: FunnelData; loading: boolean }> = ({ funnel, loading }) => {
+  const stages = [
+    { label: "New Leads",  count: funnel.new,       color: "#0ea5e9", bg: "rgba(14,165,233,0.1)",  border: "rgba(14,165,233,0.25)" },
+    { label: "Contacted",  count: funnel.contacted, color: "#6366f1", bg: "rgba(99,102,241,0.1)",  border: "rgba(99,102,241,0.25)" },
+    { label: "Qualified",  count: funnel.qualified, color: "#f59e0b", bg: "rgba(245,158,11,0.1)",  border: "rgba(245,158,11,0.25)" },
+    { label: "Converted",  count: funnel.converted, color: "#10b981", bg: "rgba(16,185,129,0.1)",  border: "rgba(16,185,129,0.25)" },
+  ];
+
+  return (
+    <Card style={{ flex: "0 0 55%" }}>
+      <div style={{ fontSize: "15px", fontWeight: 600, color: "#f0f4f8", marginBottom: "20px" }}>
+        Lead Funnel
+      </div>
+
+      {loading ? (
+        <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+          {[...Array(4)].map((_, i) => (
+            <div key={i} style={{ flex: 1, height: "72px", background: "#1a2235", borderRadius: "8px" }} />
+          ))}
+        </div>
+      ) : (
+        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+          {stages.map((stage, i) => (
+            <React.Fragment key={stage.label}>
+              <div
+                style={{
+                  flex: 1,
+                  background: stage.bg,
+                  border: `1px solid ${stage.border}`,
+                  borderRadius: "8px",
+                  padding: "12px 14px",
+                  textAlign: "center",
+                }}
+              >
+                <div style={{ fontSize: "26px", fontWeight: 700, color: stage.color, lineHeight: 1 }}>
+                  {stage.count}
+                </div>
+                <div style={{ fontSize: "11px", color: "#8899aa", marginTop: "5px", fontWeight: 500 }}>
+                  {stage.label}
+                </div>
+              </div>
+
+              {i < stages.length - 1 && (
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0 }}>
+                  <div style={{ fontSize: "10px", color: "#4a5a6b", marginBottom: "2px", fontWeight: 600 }}>
+                    {pct(stages[i + 1].count, stage.count)}
+                  </div>
+                  <div style={{ color: "#1e2d40", fontSize: "18px", lineHeight: 1 }}>→</div>
+                </div>
+              )}
+            </React.Fragment>
+          ))}
+        </div>
+      )}
+
+      {/* Stage bar — visual proportion */}
+      {!loading && (
+        <div style={{ marginTop: "14px", display: "flex", height: "4px", borderRadius: "2px", overflow: "hidden", gap: "2px" }}>
+          {stages.map((stage) => {
+            const total = funnel.new || 1;
+            const w = Math.round((stage.count / total) * 100);
+            return (
+              <div
+                key={stage.label}
+                style={{ width: `${w}%`, background: stage.color, borderRadius: "2px", minWidth: stage.count > 0 ? "4px" : "0" }}
+              />
+            );
+          })}
+        </div>
+      )}
+    </Card>
+  );
+};
+
+// ── Nexus Insights ────────────────────────────────────────────────────────────
+
+const NexusInsights: React.FC<{ data: DashboardData | null; loading: boolean }> = ({ data, loading }) => {
+  const insights = useMemo(() => {
+    if (!data) return [];
+    const items: { id: string; color: string; bgColor: string; label: string; text: string; route: string }[] = [];
+
+    if (data.funnel.new > 0) {
+      items.push({ id: "new", color: "#0ea5e9", bgColor: "rgba(14,165,233,0.12)", label: "NEW", text: `${data.funnel.new} new leads awaiting first contact`, route: "/leads" });
+    }
+    if (data.funnel.qualified > 0) {
+      items.push({ id: "qual", color: "#f59e0b", bgColor: "rgba(245,158,11,0.12)", label: "HOT", text: `${data.funnel.qualified} leads qualified and ready to book`, route: "/leads" });
+    }
+    const convPct = data.totalLeads > 0 ? Math.round((data.funnel.converted / data.totalLeads) * 100) : 0;
+    items.push({ id: "conv", color: "#10b981", bgColor: "rgba(16,185,129,0.12)", label: "RATE", text: `${convPct}% overall conversion — ${data.funnel.converted} leads converted`, route: "/leads" });
+
+    const topEntry = Object.entries(data.channelCounts).sort(([, a], [, b]) => b - a)[0];
+    if (topEntry && topEntry[1] > 0) {
+      items.push({ id: "chan", color: "#6366f1", bgColor: "rgba(99,102,241,0.12)", label: "TOP", text: `${topEntry[0].toUpperCase()} is your top source with ${topEntry[1]} leads`, route: "/analytics" });
+    }
+    if (data.bookingsConfirmed > 0) {
+      items.push({ id: "book", color: "#10b981", bgColor: "rgba(16,185,129,0.12)", label: "CAL", text: `${data.bookingsConfirmed} bookings confirmed this period`, route: "/bookings" });
+    }
+
+    return items.slice(0, 5);
+  }, [data]);
+
+  return (
+    <Card style={{ flex: "0 0 calc(45% - 16px)" }}>
+      {/* Header */}
+      <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px" }}>
+        <div style={{ width: "26px", height: "26px", borderRadius: "6px", background: "rgba(99,102,241,0.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "13px" }}>
+          ✦
+        </div>
+        <div style={{ fontSize: "15px", fontWeight: 600, color: "#f0f4f8" }}>Nexus Insights</div>
+        <div style={{ fontSize: "11px", color: "#6366f1", fontWeight: 600, background: "rgba(99,102,241,0.12)", padding: "2px 7px", borderRadius: "20px", marginLeft: "auto" }}>AI</div>
+      </div>
+
+      {loading ? (
+        <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+          {[...Array(4)].map((_, i) => (
+            <div key={i} style={{ height: "38px", background: "#1a2235", borderRadius: "6px" }} />
+          ))}
+        </div>
+      ) : insights.length === 0 ? (
+        <div style={{ fontSize: "13px", color: "#4a5a6b" }}>No insights available yet.</div>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+          {insights.map((item) => (
+            <Link
+              key={item.id}
+              to={item.route}
+              style={{ textDecoration: "none" }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px",
+                  padding: "9px 10px",
+                  borderRadius: "7px",
+                  cursor: "pointer",
+                  transition: "background 0.15s",
+                }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.background = "#1a2235"; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.background = "transparent"; }}
+              >
+                <div
+                  style={{
+                    width: "34px",
+                    height: "22px",
+                    borderRadius: "4px",
+                    background: item.bgColor,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: "9px",
+                    fontWeight: 700,
+                    color: item.color,
+                    letterSpacing: "0.04em",
+                    flexShrink: 0,
+                  }}
+                >
+                  {item.label}
+                </div>
+                <div style={{ flex: 1, fontSize: "12.5px", color: "#f0f4f8" }}>{item.text}</div>
+                <div style={{ fontSize: "14px", color: "#4a5a6b", flexShrink: 0 }}>›</div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
+    </Card>
+  );
+};
+
+// ── Chart options (unchanged) ─────────────────────────────────────────────────
 
 const CHART_OPTIONS = {
   responsive: true,
@@ -275,42 +473,53 @@ const CHART_OPTIONS = {
   },
 };
 
+// ── Main component ────────────────────────────────────────────────────────────
+
+const DATE_RANGE_LABELS: Record<DateRange, string> = {
+  today: "Today",
+  week:  "This Week",
+  month: "This Month",
+};
+
 const Dashboard: React.FC = () => {
   const { activeClientId } = useTenant();
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [dateRange, setDateRange] = useState<DateRange>("month");
 
   useEffect(() => {
     if (!activeClientId) return;
-    load(activeClientId);
-  }, [activeClientId]);
+    load(activeClientId, dateRange);
+  }, [activeClientId, dateRange]);
 
-  async function load(clientId: string) {
+  async function load(clientId: string, range: DateRange) {
     setLoading(true);
     setError(null);
     try {
+      const rangeStart = getRangeStart(range);
+
       const [
-        leadsMonthRes,
+        leadsPeriodRes,
         allLeadsRes,
         bookingsRes,
         recentLeadsRes,
         messagesRes,
       ] = await Promise.all([
-        // Leads this month
+        // Leads this period
         supabase
           .from("leads")
           .select("id", { count: "exact", head: true })
           .eq("client_id", clientId)
-          .gte("created_at", startOfMonth()),
+          .gte("created_at", rangeStart),
 
-        // All leads (for channel breakdown)
+        // All leads — source + status for funnel
         supabase
           .from("leads")
-          .select("source")
+          .select("source, status")
           .eq("client_id", clientId),
 
-        // Bookings
+        // Bookings for chart
         supabase
           .from("bookings")
           .select("id, created_at, status")
@@ -342,6 +551,16 @@ const Dashboard: React.FC = () => {
         else channelCounts[src] = (channelCounts[src] ?? 0) + 1;
       }
 
+      // Lead funnel from status
+      const funnel: FunnelData = { new: 0, contacted: 0, qualified: 0, converted: 0 };
+      for (const lead of allLeadsRes.data ?? []) {
+        const s = (lead.status ?? "new").toLowerCase();
+        if (s === "new") funnel.new++;
+        else if (s === "qualifying" || s === "open") funnel.contacted++;
+        else if (s === "qualified") funnel.qualified++;
+        else if (s === "booked" || s === "confirmed" || s === "closed") funnel.converted++;
+      }
+
       // Weekly bookings
       const weeklyBookings: Record<string, number> = {};
       for (const key of last7DayKeys()) weeklyBookings[key] = 0;
@@ -357,28 +576,20 @@ const Dashboard: React.FC = () => {
         .eq("client_id", clientId)
         .or("status.eq.confirmed,status.eq.booked");
 
-      // Activity feed: combine inbound messages + booking events
+      // Activity feed
       const feed: ActivityItem[] = [];
       for (const msg of messagesRes.data ?? []) {
         if (msg.direction !== "inbound") continue;
         const ch = (msg.channel ?? "sms").toLowerCase() as ActivityItem["type"];
-        const channelLabel =
-          ch === "sms"
-            ? "SMS received"
-            : ch === "voice"
-            ? "Call answered"
-            : "Email received";
+        const channelLabel = ch === "sms" ? "SMS received" : ch === "voice" ? "Call answered" : "Email received";
         feed.push({
           id: msg.id,
           type: ch === "voice" ? "voice" : ch === "email" ? "email" : "sms",
-          description: `${channelLabel} — ${(msg.content ?? "").slice(0, 60)}${
-            (msg.content ?? "").length > 60 ? "…" : ""
-          }`,
+          description: `${channelLabel} — ${(msg.content ?? "").slice(0, 60)}${(msg.content ?? "").length > 60 ? "…" : ""}`,
           time: msg.created_at,
         });
-        if (feed.length >= 5) break;
+        if (feed.length >= 8) break;
       }
-      // If not enough, pad with lead events
       if (feed.length < 5) {
         for (const lead of recentLeadsRes.data ?? []) {
           feed.push({
@@ -387,20 +598,20 @@ const Dashboard: React.FC = () => {
             description: `New lead: ${lead.name ?? lead.phone ?? "Unknown"}`,
             time: lead.created_at,
           });
-          if (feed.length >= 5) break;
+          if (feed.length >= 8) break;
         }
       }
-      // Sort by time desc
       feed.sort((a, b) => b.time.localeCompare(a.time));
 
       setData({
-        leadsThisMonth: leadsMonthRes.count ?? 0,
+        leadsThisPeriod: leadsPeriodRes.count ?? 0,
         totalLeads: allLeadsRes.data?.length ?? 0,
         bookingsConfirmed: confirmedCount ?? 0,
         channelCounts,
         weeklyBookings,
         recentLeads: recentLeadsRes.data ?? [],
-        activityFeed: feed.slice(0, 5),
+        activityFeed: feed.slice(0, 8),
+        funnel,
       });
     } catch (err: any) {
       setError(err?.message ?? String(err));
@@ -410,27 +621,17 @@ const Dashboard: React.FC = () => {
   }
 
   if (!activeClientId) {
-    return (
-      <div style={{ padding: "40px 24px", color: "#4a5a6b" }}>
-        No tenant selected.
-      </div>
-    );
+    return <div style={{ padding: "40px 24px", color: "#4a5a6b" }}>No tenant selected.</div>;
   }
-
   if (error) {
-    return (
-      <div style={{ padding: "40px 24px", color: "#ef4444" }}>
-        Error loading dashboard: {error}
-      </div>
-    );
+    return <div style={{ padding: "40px 24px", color: "#ef4444" }}>Error loading dashboard: {error}</div>;
   }
 
-  // ── Derived values ─────────────────────────────────────────────────────────
+  // ── Derived values ──────────────────────────────────────────────────────────
 
   const confirmedBookings = data?.bookingsConfirmed ?? 0;
   const totalLeads = data?.totalLeads ?? 0;
-  const conversionPct =
-    totalLeads > 0 ? Math.round((confirmedBookings / totalLeads) * 100) : 0;
+  const conversionPct = totalLeads > 0 ? Math.round((confirmedBookings / totalLeads) * 100) : 0;
   const estimatedRevenue = confirmedBookings * 2000;
   const yourFee = Math.round(estimatedRevenue * 0.15);
 
@@ -447,26 +648,12 @@ const Dashboard: React.FC = () => {
 
   const channelChartData = {
     labels: channelLabels,
-    datasets: [
-      {
-        data: channelValues,
-        backgroundColor: ["#0ea5e9", "#10b981", "#6366f1"],
-        borderRadius: 6,
-        borderSkipped: false,
-      },
-    ],
+    datasets: [{ data: channelValues, backgroundColor: ["#0ea5e9", "#10b981", "#6366f1"], borderRadius: 6, borderSkipped: false }],
   };
 
   const weeklyChartData = {
     labels: weekLabels,
-    datasets: [
-      {
-        data: weekValues,
-        backgroundColor: "#0ea5e9",
-        borderRadius: 6,
-        borderSkipped: false,
-      },
-    ],
+    datasets: [{ data: weekValues, backgroundColor: "#0ea5e9", borderRadius: 6, borderSkipped: false }],
   };
 
   const horizontalOptions = {
@@ -478,16 +665,45 @@ const Dashboard: React.FC = () => {
     },
   };
 
-  // ── Render ─────────────────────────────────────────────────────────────────
+  // ── Render ──────────────────────────────────────────────────────────────────
 
   return (
     <div style={{ padding: "24px", display: "flex", flexDirection: "column", gap: "20px" }}>
 
+      {/* ── Page sub-header — date range ──────────────────────────────── */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div>
+          <div style={{ fontSize: "13px", color: "#8899aa" }}>
+            {new Date().toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
+          </div>
+        </div>
+        <select
+          value={dateRange}
+          onChange={(e) => setDateRange(e.target.value as DateRange)}
+          style={{
+            background: "#1a2235",
+            border: "1px solid #1e2d40",
+            color: "#f0f4f8",
+            borderRadius: "6px",
+            padding: "8px 12px",
+            fontSize: "13px",
+            fontWeight: 500,
+            cursor: "pointer",
+            outline: "none",
+            fontFamily: "inherit",
+          }}
+        >
+          <option value="today">Today</option>
+          <option value="week">This Week</option>
+          <option value="month">This Month</option>
+        </select>
+      </div>
+
       {/* ── Metric cards ──────────────────────────────────────────────── */}
       <div style={{ display: "flex", gap: "16px" }}>
         <MetricCard
-          label="Leads this month"
-          value={data?.leadsThisMonth ?? 0}
+          label={`Leads — ${DATE_RANGE_LABELS[dateRange]}`}
+          value={data?.leadsThisPeriod ?? 0}
           sub={`${totalLeads} total leads`}
           loading={loading}
         />
@@ -511,28 +727,21 @@ const Dashboard: React.FC = () => {
         />
       </div>
 
+      {/* ── Lead Funnel + Nexus Insights ──────────────────────────────── */}
+      <div style={{ display: "flex", gap: "16px" }}>
+        <LeadFunnel funnel={data?.funnel ?? { new: 0, contacted: 0, qualified: 0, converted: 0 }} loading={loading} />
+        <NexusInsights data={data} loading={loading} />
+      </div>
+
       {/* ── Charts row ────────────────────────────────────────────────── */}
       <div style={{ display: "flex", gap: "16px" }}>
         <Card style={{ flex: 1, minWidth: 0 }}>
-          <div
-            style={{
-              fontSize: "15px",
-              fontWeight: 600,
-              color: "#f0f4f8",
-              marginBottom: "16px",
-            }}
-          >
+          <div style={{ fontSize: "15px", fontWeight: 600, color: "#f0f4f8", marginBottom: "16px" }}>
             Leads by channel
           </div>
           <div style={{ height: "160px" }}>
             {loading ? (
-              <div
-                style={{
-                  height: "100%",
-                  background: "#1a2235",
-                  borderRadius: "8px",
-                }}
-              />
+              <div style={{ height: "100%", background: "#1a2235", borderRadius: "8px" }} />
             ) : (
               <Bar data={channelChartData} options={horizontalOptions} />
             )}
@@ -540,25 +749,12 @@ const Dashboard: React.FC = () => {
         </Card>
 
         <Card style={{ flex: 1, minWidth: 0 }}>
-          <div
-            style={{
-              fontSize: "15px",
-              fontWeight: 600,
-              color: "#f0f4f8",
-              marginBottom: "16px",
-            }}
-          >
+          <div style={{ fontSize: "15px", fontWeight: 600, color: "#f0f4f8", marginBottom: "16px" }}>
             Weekly bookings
           </div>
           <div style={{ height: "160px" }}>
             {loading ? (
-              <div
-                style={{
-                  height: "100%",
-                  background: "#1a2235",
-                  borderRadius: "8px",
-                }}
-              />
+              <div style={{ height: "100%", background: "#1a2235", borderRadius: "8px" }} />
             ) : (
               <Bar data={weeklyChartData} options={CHART_OPTIONS} />
             )}
@@ -568,153 +764,129 @@ const Dashboard: React.FC = () => {
 
       {/* ── Recent leads + Activity feed ──────────────────────────────── */}
       <div style={{ display: "flex", gap: "16px" }}>
-        {/* Recent leads */}
-        <Card style={{ flex: 1, minWidth: 0 }}>
-          <div
-            style={{
-              fontSize: "15px",
-              fontWeight: 600,
-              color: "#f0f4f8",
-              marginBottom: "16px",
-            }}
-          >
-            Recent leads
+
+        {/* Recent leads — table style */}
+        <Card style={{ flex: 1, minWidth: 0, padding: 0, overflow: "hidden" }}>
+          {/* Card header */}
+          <div style={{ padding: "16px 20px 0", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <div style={{ fontSize: "15px", fontWeight: 600, color: "#f0f4f8" }}>Recent leads</div>
           </div>
 
+          {/* Table header */}
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 90px 90px",
+              padding: "8px 20px",
+              marginTop: "12px",
+              background: "#1a2235",
+              borderTop: "1px solid #1e2d40",
+              borderBottom: "1px solid #1e2d40",
+            }}
+          >
+            {["Name", "Source", "Status"].map((h) => (
+              <div key={h} style={{ fontSize: "11px", fontWeight: 600, color: "#8899aa", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                {h}
+              </div>
+            ))}
+          </div>
+
+          {/* Rows */}
           {loading ? (
-            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+            <div style={{ padding: "12px 20px", display: "flex", flexDirection: "column", gap: "10px" }}>
               {[...Array(5)].map((_, i) => (
-                <div
-                  key={i}
-                  style={{
-                    height: "36px",
-                    background: "#1a2235",
-                    borderRadius: "6px",
-                  }}
-                />
+                <div key={i} style={{ height: "32px", background: "#1a2235", borderRadius: "6px" }} />
               ))}
             </div>
           ) : data?.recentLeads.length === 0 ? (
-            <div style={{ color: "#4a5a6b", fontSize: "13px" }}>
-              No leads yet.
-            </div>
+            <div style={{ padding: "20px", color: "#4a5a6b", fontSize: "13px" }}>No leads yet.</div>
           ) : (
-            <div style={{ display: "flex", flexDirection: "column" }}>
-              {data?.recentLeads.map((lead, i) => (
-                <div
-                  key={lead.id}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    padding: "9px 0",
-                    borderTop:
-                      i === 0 ? "none" : "1px solid #1e2d40",
-                    gap: "12px",
-                  }}
-                >
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div
-                      style={{
-                        fontSize: "13px",
-                        fontWeight: 500,
-                        color: "#f0f4f8",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {lead.name ?? lead.phone ?? "Unknown"}
-                    </div>
-                    <div
-                      style={{
-                        fontSize: "11px",
-                        color: "#4a5a6b",
-                        marginTop: "1px",
-                      }}
-                    >
-                      {fmtChannel(lead.source)} · {fmtRelative(lead.created_at)}
-                    </div>
+            data?.recentLeads.map((lead) => (
+              <div
+                key={lead.id}
+                className="dashboard-lead-row"
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 90px 90px",
+                  padding: "10px 20px",
+                  borderBottom: "1px solid #1e2d40",
+                  alignItems: "center",
+                  cursor: "default",
+                  transition: "background 0.1s",
+                }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.background = "#1a2235"; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.background = "transparent"; }}
+              >
+                <div>
+                  <div style={{ fontSize: "13px", fontWeight: 500, color: "#f0f4f8", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {lead.name ?? lead.phone ?? "Unknown"}
                   </div>
-                  {lead.status && <StatusPill status={lead.status} />}
+                  <div style={{ fontSize: "11px", color: "#4a5a6b", marginTop: "1px" }}>
+                    {fmtRelative(lead.created_at)}
+                  </div>
                 </div>
-              ))}
-            </div>
+                <div><SourcePill source={lead.source} /></div>
+                <div>{lead.status && <StatusPill status={lead.status} />}</div>
+              </div>
+            ))
           )}
+
+          {/* Footer */}
+          <div style={{ padding: "12px 20px", textAlign: "right" }}>
+            <Link to="/leads" style={{ fontSize: "12px", color: "#0ea5e9", fontWeight: 500 }}>
+              View All Leads →
+            </Link>
+          </div>
         </Card>
 
         {/* Activity feed */}
-        <Card style={{ flex: 1, minWidth: 0 }}>
-          <div
-            style={{
-              fontSize: "15px",
-              fontWeight: 600,
-              color: "#f0f4f8",
-              marginBottom: "16px",
-            }}
-          >
-            Live activity feed
+        <Card style={{ flex: 1, minWidth: 0, padding: 0, overflow: "hidden" }}>
+          <div style={{ padding: "16px 20px 12px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <div style={{ fontSize: "15px", fontWeight: 600, color: "#f0f4f8" }}>Live activity feed</div>
+            <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#10b981", boxShadow: "0 0 6px #10b981" }} />
           </div>
 
-          {loading ? (
-            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-              {[...Array(5)].map((_, i) => (
-                <div
-                  key={i}
-                  style={{
-                    height: "36px",
-                    background: "#1a2235",
-                    borderRadius: "6px",
-                  }}
-                />
-              ))}
-            </div>
-          ) : data?.activityFeed.length === 0 ? (
-            <div style={{ color: "#4a5a6b", fontSize: "13px" }}>
-              No recent activity.
-            </div>
-          ) : (
-            <div style={{ display: "flex", flexDirection: "column" }}>
-              {data?.activityFeed.map((item, i) => (
+          <div
+            style={{
+              maxHeight: "300px",
+              overflowY: "auto",
+            }}
+          >
+            {loading ? (
+              <div style={{ padding: "0 20px 16px", display: "flex", flexDirection: "column", gap: "10px" }}>
+                {[...Array(5)].map((_, i) => (
+                  <div key={i} style={{ height: "36px", background: "#1a2235", borderRadius: "6px" }} />
+                ))}
+              </div>
+            ) : data?.activityFeed.length === 0 ? (
+              <div style={{ padding: "0 20px 16px", color: "#4a5a6b", fontSize: "13px" }}>No recent activity.</div>
+            ) : (
+              data?.activityFeed.map((item) => (
                 <div
                   key={item.id}
                   style={{
                     display: "flex",
-                    alignItems: "flex-start",
+                    alignItems: "center",
                     gap: "10px",
-                    padding: "9px 0",
-                    borderTop:
-                      i === 0 ? "none" : "1px solid #1e2d40",
+                    padding: "10px 20px",
+                    borderBottom: "1px solid #1e2d40",
                   }}
                 >
                   <ActivityIcon type={item.type} />
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div
-                      style={{
-                        fontSize: "12.5px",
-                        color: "#f0f4f8",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
+                    <div style={{ fontSize: "12.5px", color: "#f0f4f8", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       {item.description}
                     </div>
-                    <div
-                      style={{
-                        fontSize: "11px",
-                        color: "#4a5a6b",
-                        marginTop: "2px",
-                      }}
-                    >
-                      {fmtRelative(item.time)}
-                    </div>
+                  </div>
+                  <div style={{ fontSize: "11px", color: "#4a5a6b", flexShrink: 0, whiteSpace: "nowrap" }}>
+                    {fmtRelative(item.time)}
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
+              ))
+            )}
+          </div>
         </Card>
+
       </div>
     </div>
   );
