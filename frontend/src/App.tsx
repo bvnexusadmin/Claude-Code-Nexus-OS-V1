@@ -11,6 +11,7 @@ import LeadProfile from "./pages/LeadProfile";
 import Clients from "./pages/Clients";
 import ClientProfile from "./pages/ClientProfile";
 import Communication from "./pages/Communication";
+import Calendar from "./pages/Calendar";
 import Settings from "./pages/Settings";
 
 import AppLayout from "./layout/AppLayout";
@@ -54,6 +55,9 @@ const App: React.FC = () => {
 
           {/* Communication */}
           <Route path="communication" element={<Communication />} />
+
+          {/* Calendar */}
+          <Route path="calendar" element={<Calendar />} />
 
           <Route path="settings" element={<Settings />} />
         </Route>
