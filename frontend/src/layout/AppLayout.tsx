@@ -5,6 +5,7 @@ import { MeResponse, TenantProvider } from "../lib/tenant";
 
 const API_BASE = "";
 const TENANT_STORAGE_KEY = "nexus_active_client_id";
+const SIDEBAR_COLLAPSED_KEY = "nexus_sidebar_collapsed";
 
 async function safeReadJson(
   res: Response
@@ -18,65 +19,83 @@ async function safeReadJson(
   }
 }
 
-// ── Icons ───────────────────────────────────────────────────────────────────
+// ── Icons (lucide-style, 24×24 viewBox) ──────────────────────────────────────
 
-const Icon: React.FC<{ d: string; size?: number }> = ({ d, size = 16 }) => (
+const Icon: React.FC<{ d: string | string[]; size?: number }> = ({ d, size = 18 }) => (
   <svg
     width={size}
     height={size}
-    viewBox="0 0 16 16"
+    viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
-    strokeWidth="1.4"
+    strokeWidth="1.75"
     strokeLinecap="round"
     strokeLinejoin="round"
-    style={{ flexShrink: 0 }}
+    style={{ flexShrink: 0, minWidth: size }}
   >
-    <path d={d} />
+    {Array.isArray(d)
+      ? d.map((path, i) => <path key={i} d={path} />)
+      : <path d={d} />}
   </svg>
 );
 
 const Icons = {
-  dashboard: "M2 2h5v5H2zM9 2h5v5H9zM2 9h5v5H2zM9 9h5v5H9z",
-  inbox:
-    "M2 4h12v8H2V4zm0 0l6 4 6-4",
-  leads:
-    "M6 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm4-2a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM2 14c0-2.5 1.8-4 4-4h4c2.2 0 4 1.5 4 4",
-  bookings:
-    "M3 3h10a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zM6 1v4M10 1v4M2 7h12",
-  conversations:
-    "M2 2h12v8H8.5L5 13v-3H2V2z",
-  analytics:
-    "M2 12h3V8H2zM6.5 12h3V5h-3zM11 12h3V2h-3z",
-  settings:
-    "M8 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm4.7-2a4.7 4.7 0 0 0 0-1l1.3-1-1-1.7-1.5.5a5 5 0 0 0-.9-.5L10.3 3h-2l-.3 1.3a5 5 0 0 0-.9.5L5.6 4.3 4.7 6l1.3 1a4.7 4.7 0 0 0 0 1L4.7 9l1 1.7 1.5-.5c.3.2.6.4.9.5L8.3 12h2l.3-1.3c.3-.1.6-.3.9-.5l1.5.5 1-1.7-1.3-1z",
+  dashboard:  "M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z",
+  leads:      [
+    "M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2",
+    "M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z",
+    "M23 21v-2a4 4 0 0 0-3-3.87",
+    "M16 3.13a4 4 0 0 1 0 7.75",
+  ],
+  clients:    [
+    "M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z",
+    "M9 22V12h6v10",
+  ],
+  communication: "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z",
+  calendar:   [
+    "M3 4h18a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z",
+    "M16 2v4M8 2v4M2 10h20",
+  ],
+  analytics:  "M3 3v18h18M7 16v-5M12 16V8M17 16v-3",
+  settings:   [
+    "M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z",
+    "M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z",
+  ],
+  sparkles:   [
+    "M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5z",
+    "M5.5 16l.75 2.25 2.25.75-2.25.75L5.5 22l-.75-2.25L2.5 19l2.25-.75z",
+    "M18.5 3l.75 2.25 2.25.75-2.25.75L18.5 9l-.75-2.25L15.5 6l2.25-.75z",
+  ],
+  chevronLeft:  "M15 18l-6-6 6-6",
+  chevronRight: "M9 18l6-6-6-6",
 };
 
+// ── Nav items (exact order per spec) ─────────────────────────────────────────
+
 const NAV_ITEMS = [
-  { to: "/dashboard", label: "Dashboard", icon: Icons.dashboard, end: true },
-  { to: "/inbox", label: "Inbox", icon: Icons.inbox, end: true },
-  { to: "/leads", label: "Leads", icon: Icons.leads, end: true },
-  { to: "/bookings", label: "Bookings", icon: Icons.bookings, end: true },
-  { to: "/conversations", label: "Conversations", icon: Icons.conversations, end: true },
-  { to: "/analytics", label: "Analytics", icon: Icons.analytics, end: true },
-  { to: "/settings", label: "Settings", icon: Icons.settings, end: true },
+  { to: "/dashboard",     label: "Dashboard",     icon: Icons.dashboard,     end: true  },
+  { to: "/leads",         label: "Leads",          icon: Icons.leads,         end: false },
+  { to: "/clients",       label: "Clients",        icon: Icons.clients,       end: false },
+  { to: "/communication", label: "Communication",  icon: Icons.communication, end: false },
+  { to: "/calendar",      label: "Calendar",       icon: Icons.calendar,      end: false },
+  { to: "/analytics",     label: "Analytics",      icon: Icons.analytics,     end: false },
+  { to: "/settings",      label: "Settings",       icon: Icons.settings,      end: false },
 ];
 
 const PAGE_TITLES: Record<string, string> = {
-  "/dashboard": "Dashboard",
-  "/inbox": "Inbox",
-  "/leads": "Leads",
-  "/bookings": "Bookings",
-  "/conversations": "Conversations",
-  "/analytics": "Analytics",
-  "/settings": "Settings",
-  "/admin": "Admin",
+  "/dashboard":     "Dashboard",
+  "/leads":         "Leads",
+  "/clients":       "Clients",
+  "/communication": "Communication",
+  "/calendar":      "Calendar",
+  "/analytics":     "Analytics",
+  "/settings":      "Settings",
+  "/inbox":         "Inbox",
+  "/bookings":      "Bookings",
 };
 
 function getPageTitle(pathname: string): string {
-  // exact match
   if (PAGE_TITLES[pathname]) return PAGE_TITLES[pathname];
-  // prefix match for nested routes
   const prefix = Object.keys(PAGE_TITLES).find(
     (k) => k !== "/" && pathname.startsWith(k + "/")
   );
@@ -89,6 +108,26 @@ const AppLayout: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // ── Sidebar collapse state (persisted) ──────────────────────────────────
+  const [collapsed, setCollapsed] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === "true";
+    } catch {
+      return false;
+    }
+  });
+
+  const toggleCollapsed = () => {
+    const next = !collapsed;
+    setCollapsed(next);
+    try {
+      localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(next));
+    } catch {}
+  };
+
+  const sidebarWidth = collapsed ? "60px" : "220px";
+
+  // ── Tenant / auth state ──────────────────────────────────────────────────
   const [me, setMe] = useState<MeResponse | null>(null);
   const [loadingMe, setLoadingMe] = useState(true);
   const [meError, setMeError] = useState<string | null>(null);
@@ -178,6 +217,8 @@ const AppLayout: React.FC = () => {
   const userInitial = userEmail ? userEmail.charAt(0).toUpperCase() : "U";
   const clientName = me?.active?.client?.name ?? (loadingMe ? "…" : "—");
 
+  // ── Render ───────────────────────────────────────────────────────────────
+
   return (
     <TenantProvider
       value={{
@@ -191,15 +232,16 @@ const AppLayout: React.FC = () => {
         refreshMe,
       }}
     >
-      <div style={{ display: "flex", height: "100vh", overflow: "hidden", background: "#0a0e1a" }}>
+      <div style={{ display: "flex", height: "100vh", overflow: "hidden", background: "var(--color-bg-base)" }}>
 
-        {/* ── Sidebar ─────────────────────────────────────────────────── */}
+        {/* ── Sidebar ───────────────────────────────────────────────────── */}
         <aside
+          className={collapsed ? "sidebar-collapsed" : undefined}
           style={{
-            width: "220px",
+            width: sidebarWidth,
             flexShrink: 0,
-            background: "#0a0e1a",
-            borderRight: "1px solid #1e2d40",
+            background: "var(--color-bg-base)",
+            borderRight: "1px solid var(--color-bg-border)",
             display: "flex",
             flexDirection: "column",
             height: "100vh",
@@ -208,176 +250,171 @@ const AppLayout: React.FC = () => {
             left: 0,
             zIndex: 20,
             overflow: "hidden",
+            transition: "width 0.2s ease",
           }}
         >
-          {/* Logo */}
-          <div style={{ padding: "20px 16px 16px" }}>
-            <div
-              style={{
-                fontSize: "16px",
-                fontWeight: 700,
-                color: "#f0f4f8",
-                letterSpacing: "-0.01em",
-              }}
-            >
-              Nexus OS
-            </div>
-            <div
-              style={{
-                fontSize: "12px",
-                color: "#8899aa",
-                marginTop: "3px",
-              }}
-            >
-              Brautigam Ventures
-            </div>
-          </div>
 
+          {/* ── Logo area ───────────────────────────────────────────────── */}
           <div
             style={{
-              height: "1px",
-              background: "#1e2d40",
-              margin: "0",
+              padding: "16px",
+              display: "flex",
+              alignItems: "center",
+              gap: collapsed ? 0 : "10px",
+              overflow: "hidden",
+              flexShrink: 0,
             }}
-          />
+          >
+            <div className="bv-avatar">BV</div>
+            {!collapsed && (
+              <div style={{ overflow: "hidden" }}>
+                <div style={{ fontSize: "16px", fontWeight: 700, color: "var(--color-text-primary)", letterSpacing: "-0.01em", whiteSpace: "nowrap" }}>
+                  Nexus OS
+                </div>
+                <div style={{ fontSize: "13px", color: "var(--color-text-secondary)", marginTop: "1px", whiteSpace: "nowrap" }}>
+                  Brautigam Ventures
+                </div>
+              </div>
+            )}
+          </div>
 
-          {/* Navigation */}
+          <div style={{ height: "1px", background: "var(--color-bg-border)", flexShrink: 0 }} />
+
+          {/* ── Navigation ──────────────────────────────────────────────── */}
           <nav
             style={{
               flex: 1,
               padding: "8px 0",
               display: "flex",
               flexDirection: "column",
-              overflow: "hidden",
+              overflowY: "auto",
+              overflowX: "hidden",
             }}
           >
             {NAV_ITEMS.map((item) => (
-              <NavLink
-                key={item.label}
-                to={item.to}
-                end={item.end}
-                style={({ isActive }) => ({
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "10px",
-                  padding: "10px 16px",
-                  margin: "2px 8px",
-                  borderRadius: "7px",
-                  fontSize: "14px",
-                  fontWeight: 500,
-                  color: isActive ? "#0ea5e9" : "#8899aa",
-                  background: isActive ? "rgba(14, 165, 233, 0.12)" : "transparent",
-                  borderLeft: isActive ? "2px solid #0ea5e9" : "2px solid transparent",
-                  cursor: "pointer",
-                  transition: "all 0.15s ease",
-                  textDecoration: "none",
-                })}
-              >
-                <Icon d={item.icon} size={15} />
-                {item.label}
-              </NavLink>
+              <div key={item.label} className="nav-wrapper">
+                <NavLink
+                  to={item.to}
+                  end={item.end}
+                  className={({ isActive }) => `nav-item${isActive ? " active" : ""}`}
+                >
+                  <Icon d={item.icon} size={17} />
+                  <span className="nav-label">{item.label}</span>
+                </NavLink>
+                <span className="nav-tooltip">{item.label}</span>
+              </div>
             ))}
+
+            {/* Flex spacer */}
+            <div style={{ flex: 1 }} />
+
+            {/* Ask Nexus */}
+            <div className="nav-wrapper" style={{ marginTop: "8px" }}>
+              <div className="nav-item-ask">
+                <Icon d={Icons.sparkles} size={17} />
+                <span className="nav-label">Ask Nexus</span>
+              </div>
+              <span className="nav-tooltip">Ask Nexus</span>
+            </div>
+
+            {/* Collapse toggle */}
+            <button
+              className="sidebar-toggle"
+              onClick={toggleCollapsed}
+              title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+              style={{ marginTop: "8px" }}
+            >
+              <Icon d={collapsed ? Icons.chevronRight : Icons.chevronLeft} size={15} />
+            </button>
           </nav>
 
+          <div style={{ height: "1px", background: "var(--color-bg-border)", flexShrink: 0 }} />
+
+          {/* ── User info (bottom) ──────────────────────────────────────── */}
           <div
             style={{
-              height: "1px",
-              background: "#1e2d40",
+              padding: "14px 16px",
+              display: "flex",
+              alignItems: "center",
+              gap: collapsed ? 0 : "10px",
+              overflow: "hidden",
+              flexShrink: 0,
             }}
-          />
+          >
+            <div className="user-avatar" title={userEmail}>{userInitial}</div>
 
-          {/* Client / User info */}
-          <div style={{ padding: "16px" }}>
-            {loadingMe ? (
-              <div style={{ fontSize: "12px", color: "#4a5a6b" }}>
-                Loading…
-              </div>
-            ) : meError ? (
-              <div
-                style={{
-                  fontSize: "11px",
-                  color: "#ef4444",
-                  whiteSpace: "pre-wrap",
-                }}
-              >
-                {meError}
-              </div>
-            ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
-                <div
-                  style={{
-                    fontSize: "13px",
-                    fontWeight: 600,
-                    color: "#f0f4f8",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {clientName}
-                </div>
-                <div style={{ fontSize: "12px", color: "#8899aa" }}>
-                  {activeRole ?? "—"}
-                </div>
+            {!collapsed && (
+              <div style={{ flex: 1, minWidth: 0 }}>
+                {loadingMe ? (
+                  <div style={{ fontSize: "12px", color: "var(--color-text-muted)" }}>Loading…</div>
+                ) : meError ? (
+                  <div style={{ fontSize: "11px", color: "var(--color-danger)", whiteSpace: "pre-wrap" }}>
+                    {meError}
+                  </div>
+                ) : (
+                  <>
+                    <div
+                      style={{
+                        fontSize: "13px",
+                        fontWeight: 600,
+                        color: "var(--color-text-primary)",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {clientName}
+                    </div>
+                    <div style={{ fontSize: "12px", color: "var(--color-text-secondary)", marginTop: "1px" }}>
+                      {activeRole ?? "—"}
+                    </div>
+                  </>
+                )}
+
+                {/* Tenant switcher */}
+                {!loadingMe && !meError && memberships.length > 1 && (
+                  <select
+                    value={me?.active?.client_id ?? ""}
+                    onChange={(e) => switchTenant(e.target.value)}
+                    style={{
+                      marginTop: "8px",
+                      width: "100%",
+                      padding: "5px 8px",
+                      fontSize: "11px",
+                      border: "1px solid var(--color-bg-border)",
+                      borderRadius: "6px",
+                      background: "var(--color-bg-surface)",
+                      color: "var(--color-text-secondary)",
+                      cursor: "pointer",
+                    }}
+                  >
+                    {memberships.map((m) => (
+                      <option key={m.client_id} value={m.client_id}>
+                        {m.client?.name ?? m.client_id} ({m.role})
+                      </option>
+                    ))}
+                  </select>
+                )}
+
+                <button className="sign-out-btn" onClick={handleLogout}>
+                  Sign out
+                </button>
               </div>
             )}
-
-            {/* Tenant switcher */}
-            {!loadingMe && !meError && memberships.length > 1 && (
-              <select
-                value={me?.active?.client_id ?? ""}
-                onChange={(e) => switchTenant(e.target.value)}
-                style={{
-                  marginTop: "8px",
-                  width: "100%",
-                  padding: "6px 8px",
-                  fontSize: "12px",
-                  border: "1px solid #1e2d40",
-                  borderRadius: "6px",
-                  background: "#111827",
-                  color: "#8899aa",
-                  cursor: "pointer",
-                }}
-              >
-                {memberships.map((m) => (
-                  <option key={m.client_id} value={m.client_id}>
-                    {m.client?.name ?? m.client_id} ({m.role})
-                  </option>
-                ))}
-              </select>
-            )}
-
-            <button
-              onClick={handleLogout}
-              style={{
-                marginTop: "10px",
-                width: "100%",
-                padding: "8px 12px",
-                fontSize: "12px",
-                fontWeight: 500,
-                color: "#8899aa",
-                background: "transparent",
-                border: "1px solid #1e2d40",
-                borderRadius: "6px",
-                cursor: "pointer",
-                textAlign: "left",
-              }}
-            >
-              Sign out
-            </button>
           </div>
         </aside>
 
-        {/* ── Main area ───────────────────────────────────────────────── */}
+        {/* ── Main area ─────────────────────────────────────────────────── */}
         <div
           style={{
-            marginLeft: "220px",
+            marginLeft: sidebarWidth,
             flex: 1,
             display: "flex",
             flexDirection: "column",
             height: "100vh",
             overflow: "hidden",
-            background: "#0a0e1a",
+            background: "var(--color-bg-base)",
+            transition: "margin-left 0.2s ease",
           }}
         >
           {/* Top bar */}
@@ -385,21 +422,15 @@ const AppLayout: React.FC = () => {
             style={{
               height: "56px",
               flexShrink: 0,
-              background: "#111827",
-              borderBottom: "1px solid #1e2d40",
+              background: "var(--color-bg-surface)",
+              borderBottom: "1px solid var(--color-bg-border)",
               padding: "0 28px",
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
             }}
           >
-            <h1
-              style={{
-                fontSize: "16px",
-                fontWeight: 600,
-                color: "#f0f4f8",
-              }}
-            >
+            <h1 style={{ fontSize: "16px", fontWeight: 600, color: "var(--color-text-primary)" }}>
               {pageTitle}
             </h1>
 
@@ -410,13 +441,13 @@ const AppLayout: React.FC = () => {
                   display: "inline-flex",
                   alignItems: "center",
                   gap: "5px",
-                  background: "rgba(16, 185, 129, 0.12)",
-                  color: "#10b981",
+                  background: "var(--color-success-bg)",
+                  color: "var(--color-success)",
                   fontSize: "11px",
                   fontWeight: 600,
                   padding: "4px 10px",
                   borderRadius: "999px",
-                  border: "1px solid rgba(16, 185, 129, 0.3)",
+                  border: "1px solid var(--color-success-border)",
                 }}
               >
                 <span
@@ -424,7 +455,7 @@ const AppLayout: React.FC = () => {
                     width: "6px",
                     height: "6px",
                     borderRadius: "50%",
-                    background: "#10b981",
+                    background: "var(--color-success)",
                     display: "inline-block",
                   }}
                 />
@@ -438,8 +469,8 @@ const AppLayout: React.FC = () => {
                   width: "32px",
                   height: "32px",
                   borderRadius: "50%",
-                  background: "#0ea5e9",
-                  color: "#0a0e1a",
+                  background: "var(--color-accent)",
+                  color: "var(--color-bg-base)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -455,13 +486,7 @@ const AppLayout: React.FC = () => {
           </header>
 
           {/* Page content */}
-          <main
-            style={{
-              flex: 1,
-              overflow: "auto",
-              background: "#0a0e1a",
-            }}
-          >
+          <main style={{ flex: 1, overflow: "auto", background: "var(--color-bg-base)" }}>
             <Outlet />
           </main>
         </div>
